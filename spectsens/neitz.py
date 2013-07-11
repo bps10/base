@@ -1,10 +1,10 @@
 # -*- coding: utf-8 *-*
-from __future__ import division
 import numpy as np
 
 
-def neitz(LambdaMax=559, OpticalDensity=0.2, Output='log',
-                StartWavelength=380, EndWavelength=780, Res=1000):
+def neitz(LambdaMax=559, OpticalDensity=0.5, LOG=False,
+                StartWavelength=390, EndWavelength=780, 
+                resolution=1, EXTINCTION=False):
     """This function returns a photopigment spectral sensitivity curve
     as defined by Carroll, McMahon, Neitz, and Neitz.
 
@@ -55,7 +55,7 @@ def neitz(LambdaMax=559, OpticalDensity=0.2, Output='log',
     A2 = (np.log10(1.0 / LambdaMax) - np.log10(1.0 / 558.5))
 
     vector = np.log10(np.arange(StartWavelength,
-                    EndWavelength + Res, Res) ** -1.0)
+                    EndWavelength + resolution, resolution) ** -1.0)
 
     const = 1.0 / np.sqrt(2.0 * np.pi)
 
@@ -77,12 +77,14 @@ def neitz(LambdaMax=559, OpticalDensity=0.2, Output='log',
     ODTemp = np.log10((1.0 - 10.0 ** -((10.0 ** exTemp) *
                         Z)) / (1.0 - 10 ** -Z))
 
-    if Output.lower() == 'log':
+    if LOG:
         extinction = exTemp
         withOD = ODTemp
     else:
         extinction = 10.0 ** exTemp
         withOD = 10.0 ** ODTemp
 
-    return withOD, extinction
+    if EXTINCTION:
+        return extinction
+    return withOD
 
