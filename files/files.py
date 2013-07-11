@@ -1,4 +1,5 @@
 import glob as glob
+import numpy as np
 
 def getAllFiles(dirName, suffix = None, subdirectories = 1):
     """

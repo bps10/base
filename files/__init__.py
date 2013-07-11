@@ -1,1 +1,1 @@
-import files
+from files import *
