@@ -1,6 +1,6 @@
 import numpy as np
 
-from base import DataManip as dm
+from base import data as dm
         
 
 def RemoveMean(image):
@@ -21,11 +21,13 @@ def RemoveMean(image):
     
     return out
 
+
 def decibels(x):
     '''
     '''
     return 10.0 * np.log10(x)
     
+
 def Density(dat):
     """Compute the density of a power spectrum.
     

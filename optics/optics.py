@@ -71,7 +71,7 @@ def res_lim(pupil_size, wavelength):
     return (pupil_size / wl) * (180.0 / np.pi)
 
 
-def diffraction(deg, samples, pupil_size_mm, focal_len, ref_index=1.336, wavelength=550.0):
+def diffraction(samples, pupil_size_mm, focal_len, ref_index=1.336, wavelength=550.0):
     '''See Appendix B of "Light, the Retinal Image and Photoreceptors"
     Packer & Williams.
 
@@ -123,24 +123,6 @@ def nextpow2(n):
     m_i = np.ceil(m_f)
 
     return 2 ** m_i
-
-
-def deg2rad(degrees):
-    '''
-    '''
-    return degrees * np.pi / 180.0
-    
-
-def rad2deg(radians):
-    '''Convert radians to degrees.
-    '''
-    return radians * 180.0 / np.pi
-
-
-def decibels(x):
-    '''
-    '''
-    return 10.0 * np.log10(x)
 
 
 def MTF(spatial_frequency,eccentricity, paper='Williams1996_astig'):
