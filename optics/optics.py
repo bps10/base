@@ -2,10 +2,10 @@ from __future__ import division
 import numpy as np
 
 
-def genPSF(intensity, xvals):
+def genPSF(intensity, samples):
     '''
     '''
-    samples = len(xvals)
+    xvals = np.arange(0, samples)
     PSF = np.zeros(samples)
     PSFtotal = np.zeros((samples * 2) + 1)
 
