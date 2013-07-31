@@ -1,8 +1,9 @@
 import numpy as np
 from scipy import interpolate
 
+from base import spectsens as ss
 
-def genReceptiveFields(freqs, cone_spacing):
+def genReceptiveFields(freqs, cone_spacing, peaks=None, wvlen=None):
     """Create a difference of gaussians receptive field and plot it.
 
     :param excite_SD: standard deviation parameter of excitatory gaussian.
@@ -21,32 +22,43 @@ def genReceptiveFields(freqs, cone_spacing):
     FFT_RF = []
     RField = []
 
-    RF_DOG = findSpacing(Xvals, cone_spacing)
+    if peaks is not None and len(peaks) == 2 and wvlen is not None:
+
+        K_excite = ss.neitz(LambdaMax=peaks[0], OpticalDensity=0.5, LOG=False,
+                StartWavelength=wvlen, EndWavelength=wvlen, 
+                resolution=1, EXTINCTION=False)
+        K_inhibit = ss.neitz(LambdaMax=peaks[1], OpticalDensity=0.5, LOG=False,
+                StartWavelength=wvlen, EndWavelength=wvlen, 
+                resolution=1, EXTINCTION=False)
+    else:
+        K_excite, K_inhibit = 1, 1
+
+    RF_DOG = findSpacing(Xvals, K_excite, K_inhibit, cone_spacing)
     FFT_RF = Fourier(RF_DOG, N)
     length = np.floor(FFT_RF.shape[0] / 2.) + 1
-    RField = normRField(freqs, Xvals[length:] * 60,
+    RField = interpRField(freqs, Xvals[length:] * 60,
                              FFT_RF[length:])
 
     receptive_field = {
                             'length': length,
                             'dog': RF_DOG,
-                            'coneResponse': {'fft': FFT_RF, },
+                            'coneResponse': FFT_RF,
                             'fft': RField,
-                            'xvals': Xvals
+                            'xvals': Xvals,
                             }
     return receptive_field
 
 
-def findSpacing(Xvals, cone_spacing=2.0):
+def findSpacing(Xvals, K_excite, K_inhibit, cone_spacing=2.0):
     SD = 0.1
-    dog = DoG(Xvals, SD, 5.0)
+    dog = DoG(Xvals, SD, 5.0, K_excite, K_inhibit)
     dist = findDist(Xvals, dog)
     i = 0
 
     if dist < cone_spacing:
         while dist < cone_spacing:
             SD += 0.05
-            dog = DoG(Xvals, SD, 5.0)
+            dog = DoG(Xvals, SD, 5.0, K_excite, K_inhibit)
             dist = findDist(Xvals, dog)
             i += 1
             if i == 99:
@@ -54,7 +66,7 @@ def findSpacing(Xvals, cone_spacing=2.0):
     if dist > cone_spacing:
         while dist < cone_spacing:
             SD -= 0.01
-            dog = DoG(Xvals, SD, 5.0)
+            dog = DoG(Xvals, SD, 5.0, K_excite, K_inhibit)
             dist = findDist(Xvals, dog)
             i += 1
             if i == 99:
@@ -90,24 +102,24 @@ def sineWave(thisFrequency, xvals):
     return sWave
 
 
-def normRField(freqs, xp, yp):
-    """return a normalized receptive field generated from a linear
+def interpRField(freqs, xp, yp):
+    """return a receptive field generated from a linear
     interpolation handle.
     """
     foo = np.interp(freqs[1:], xp, yp)
-    rfield = foo / np.sum(foo)
-    return rfield
+    #rfield = foo / np.sum(foo)
+    return foo
 
 
 def Fourier(recField, N):
-    """return a normalized Fourier transformed receptive field.
+    """return a Fourier transformed receptive field.
     """
-    FFT_RF = np.fft.fftshift(np.abs(np.fft.fft(recField))) / np.sqrt(2 * N)
-    normFFT = FFT_RF / np.sum(FFT_RF)
-    return normFFT
+    FFT_RF = np.fft.fftshift(np.abs(np.fft.fft(recField))) #/ np.sqrt(2 * N)
+    #normFFT = FFT_RF / np.sum(FFT_RF)
+    return FFT_RF #normFFT
 
 
-def DoG(xvals, excite_SD, inhibit_SD):
+def DoG(xvals, excite_SD, inhibit_SD, K_excite, K_inhibit):
     """Generate a differenc of gaussian receptive field model.
 
     .. math::
@@ -125,8 +137,8 @@ def DoG(xvals, excite_SD, inhibit_SD):
     y_inhibit = gauss(xvals, inhibit_SD)
     normFact = np.sum(y_excite) / np.sum(y_inhibit)
     y_inhibit *= normFact
-    DoG_foo = y_excite - y_inhibit
-    return DoG_foo / max(DoG_foo)
+    DoG_foo = (K_excite * y_excite) - (K_inhibit * y_inhibit)
+    return DoG_foo #/ max(DoG_foo)
 
 
 def gauss(x, SD):
