@@ -2,7 +2,8 @@ from __future__ import division
 import numpy as np
 
 
-def genPSF(intensity, samples):
+
+def genPSF(intensity, samples, gaussian_blur=True):
     '''
     '''
     xvals = np.arange(0, samples)
@@ -27,13 +28,24 @@ def genPSF(intensity, samples):
         PSF[i] = deriv[i]  / area 
 
     # normalize so that each PSF has same integral of 1.
-
+    #PSF = np.sqrt(PSF)
     PSF = PSF / np.sum(PSF)
 
     PSFtotal[1:samples + 1] = PSF[::-1]
     PSFtotal[samples:-1] = PSF
 
+    if gaussian_blur:
+        gaussianFilter = gauss(np.arange(-samples, samples + 1), 2)
+        PSFtotal = np.convolve(PSFtotal, gaussianFilter, mode='same')
+
+
     return PSF, PSFtotal
+
+
+def gauss(x, SD):
+    """A simple gaussian function with a mean of 0
+    """
+    return 1.0 * np.exp(-(x) ** 2 / (2 * SD ** 2))
 
 
 def genMTF(PSFtotal):
