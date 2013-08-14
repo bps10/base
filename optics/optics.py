@@ -269,15 +269,13 @@ def StilesCrawford1stKind(x, xmax, n, rho):
 
     
     
-def SterhlRatio(sigma, lam):
+def StrehlRatio(diffraction, sample):
     """
-    Find the Sterhl ratio.
+    Find the Strehl ratio.
     
-    .. warning::
-       This funciton is not finished or tested.
-       
+    Send in peak of PSF for diffraction limited case and sample.
     """
     
-    return np.exp(-2.0 * np.pi * sigma / lam)**2.0
+    return diffraction / sample
     
 
