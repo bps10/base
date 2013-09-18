@@ -3,8 +3,11 @@ import os
 import unittest
 import numpy as np
 
-from base import spectsens as sp
+import spectsens as sp
 
+import sys
+
+sys.path.append('../../')
 
 class TestSpec(unittest.TestCase):
 
