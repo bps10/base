@@ -3,6 +3,9 @@ import numpy as np
 from scipy.optimize import fsolve
 import matplotlib.pylab as plt
 
+
+from base import spectsens as s
+
 class cone(object):
 	''' cone_arma
 
@@ -21,14 +24,18 @@ class cone(object):
 	    Author: J.H. van Hateren,  28 / 8 / 06
 '''
 
-	def __init__(self):
+	def __init__(self, wvlen=559, peak_sens=559):
 		'''
 		'''
 		self._gen_data_container()
 		self._gen_constants()
 		self._gen_time_constants()
 		self.get_dark_values()
+		sensitivity = s.neitz(LambdaMax=peak_sens, OpticalDensity=0.4, LOG=False,
+                	StartWavelength=wvlen, EndWavelength=wvlen, 
+                	resolution=1, EXTINCTION=False)
 		self.stimulus = self.load_stimulus()
+		self.stimulus = self.stimulus * sensitivity
 		self.get_adaptive_states()
 		
 	def _gen_data_container(self):
@@ -75,27 +82,44 @@ class cone(object):
 
 	def _gen_constants(self):
 		'''
+		nstep = time steps per ms default 10
+		tau_r_ms = R* lifetime (np.expressed in ms)
+		tau_r = R* lifetime np.expressed in time steps
+		cn = normalization constant for cone bleaching (4.1e - 9 if tau_r = 3.4 ms) 
+		tau_b0 = time constant of bleaching recovery
+		rk_b = parameter of bleaching recovery
+		tau_e = E*  lifetime
+		c_beta = dark PDE activity ( = 1 / tau_D)
+		rk_beta = E*  dependence of PDE activity
+		beta_e_max = parameter diffusion - limited cGMP hydrolysis
+		rnx = apparent Hill coefficient CNG channels
+		rnc = Hill coefficient GC activation
+		tau_c = time constant of Ca2 +  extrusion
+		a_c = scaling constant of GC activation
+		tau_vc = membrane time constant
+		gamma_is = parameter of membrane nonlinearity
+		tau_is = time constant of membrane nonlinearity
+		a_is = parameter of membrane nonlinearity
 		'''
 		self.const = {}
-		self.const['nstep'] = 10               # time steps per ms default 10
-		self.const['tau_r_ms'] = 3.4           # R* lifetime (np.expressed in ms)
-		self.const['tau_r'] = 3.4 * self.const['nstep']   # R* lifetime np.expressed in time steps
-		self.const['cn'] = 4.1e-9 * self.const['tau_r_ms'] / 3.4 # normalization constant for cone - 
-		                         			   # bleaching (4.1e - 9 if tau_r = 3.4 ms)
-		self.const['tau_b0'] = 25000 * self.const['nstep']   # time constant of bleaching recovery
-		self.const['rk_b'] = 0.2               # parameter of bleaching recovery
-		self.const['tau_e'] = 8.7 * self.const['nstep']      # E*  lifetime
-		self.const['c_beta'] = 2.8e-3          # dark PDE activity ( = 1 / tau_D)
-		self.const['rk_beta'] = 1.4e-4         # E*  dependence of PDE activity
-		self.const['beta_e_max'] = 4           # parameter diffusion - limited cGMP hydrolysis
-		self.const['rnx'] = 1                  # apparent Hill coefficient CNG channels
-		self.const['rnc'] = 4                  # Hill coefficient GC activation
-		self.const['tau_c'] = 3 * self.const['nstep']    # time constant of Ca2 +  extrusion
-		self.const['a_c'] = 0.23               # scaling constant of GC activation
-		self.const['tau_vc'] = 4 * self.const['nstep']  # membrane time constant
-		self.const['gamma_is'] = 0.7           # parameter of membrane nonlinearity
-		self.const['tau_is'] = 90 * self.const['nstep']  # time constant of membrane nonlinearity
-		self.const['a_is'] = 2.9e-2            # parameter of membrane nonlinearity
+		self.const['nstep'] = 10               
+		self.const['tau_r_ms'] = 3.4          
+		self.const['tau_r'] = 3.4 * self.const['nstep'] 
+		self.const['cn'] = 4.1e-9 * self.const['tau_r_ms'] / 3.4
+		self.const['tau_b0'] = 25000 * self.const['nstep']  
+		self.const['rk_b'] = 0.2               
+		self.const['tau_e'] = 8.7 * self.const['nstep']     
+		self.const['c_beta'] = 2.8e-3          
+		self.const['rk_beta'] = 1.4e-4         
+		self.const['beta_e_max'] = 4           
+		self.const['rnx'] = 1                  
+		self.const['rnc'] = 4                 
+		self.const['tau_c'] = 3 * self.const['nstep']    
+		self.const['a_c'] = 0.23               
+		self.const['tau_vc'] = 4 * self.const['nstep']  
+		self.const['gamma_is'] = 0.7           
+		self.const['tau_is'] = 90 * self.const['nstep']
+		self.const['a_is'] = 2.9e-2            
 
 	def _gen_time_constants(self):
 		'''
@@ -134,7 +158,7 @@ class cone(object):
 	def load_stimulus(self):
 		'''
 		'''
-		return np.genfromtxt('stimulus.txt')
+		return np.genfromtxt('base/cones/stimulus.txt')
 
 	def get_dark_values(self):
 		'''
@@ -258,7 +282,7 @@ class cone(object):
 				self.data['beta'][ncurr] = (self.const['c_beta'] + 
 											self.const['rk_beta'] * self.data['resp_e'][ncurr])
 				self.data['beta_e'][ncurr] = (self.data['beta'][ncurr] / 
-											(1 + self.data['beta'][ncurr] / self.const['beta_e_max']))
+										(1 + self.data['beta'][ncurr] / self.const['beta_e_max']))
 				self.data['resp_q'][ncurr] = 1 / self.data['beta_e'][ncurr]
 
 				# express tau_x in time steps
@@ -268,8 +292,8 @@ class cone(object):
 				f3_tau_x = 1 - self.data['tau_x'][ncurr] + self.data['tau_x'][ncurr] * f1_tau_x
 
 				self.data['resp_x'][ncurr] = (f1_tau_x * self.data['resp_x'][nprev] + 
-								  self.data['gain_x'][nprev] * f2_tau_x * self.data['resp_q'][nprev] + 
-								  self.data['gain_x'][nprev] * f3_tau_x * self.data['resp_q'][ncurr])
+							self.data['gain_x'][nprev] * f2_tau_x * self.data['resp_q'][nprev] + 
+							self.data['gain_x'][nprev] * f3_tau_x * self.data['resp_q'][ncurr])
 				#print self.data['resp_x'], self.data['gain_x'][nprev]
 				
 				self.data['resp_os'][ncurr] = self.data['resp_x'][ncurr] ** self.const['rnx']
@@ -281,7 +305,8 @@ class cone(object):
 				self.data['gain_x'][ncurr] = (1 / (1 + (self.const['a_c'] * 
 												self.data['resp_c'][ncurr]) ** self.const['rnc']))
 				   
-				self.data['resp_vc'][ncurr] = self.data['resp_os'][ncurr] / self.data['atten_i'][nprev] 
+				self.data['resp_vc'][ncurr] = (self.data['resp_os'][ncurr] / 
+										self.data['atten_i'][nprev] )
 				
 				self.data['resp_is'][ncurr] = (self.time_k['f1_tau_vc'] * 
 										self.data['resp_is'][nprev] + self.time_k['f2_tau_vc'] * 
@@ -334,6 +359,9 @@ class cone(object):
 
 
 def plot_cone():
+	'''
+	'''
+	from base import plot as pf
 
 	c = cone()
 	stimulus, response = c.simulate()
@@ -341,9 +369,11 @@ def plot_cone():
 	fig  = plt.figure(figsize=(10, 8))
 	ax1 = fig.add_subplot(211)
 	ax2 = fig.add_subplot(212)
+	pf.AxisFormat()
+	pf.TufteAxis(ax1, ['left'], [5, 5])
+	pf.TufteAxis(ax2, ['left', 'bottom'], [5, 5])
 
 	ax1.semilogy(stimulus, 'k')
-
 	ax2.plot(response, 'k')
 
 	ax1.set_ylabel('luminance (td)')
