@@ -22,6 +22,7 @@ class cone(object):
 		         see further README file and article
 
 	    Author: J.H. van Hateren,  28 / 8 / 06
+	    Subsequent development by B.P. Schmidt
 '''
 
 	def __init__(self, wvlen=559, peak_sens=559):
@@ -60,25 +61,13 @@ class cone(object):
 		atten_i = attenuation by inner segment feedback loop
 		'''
 
-		self.data = {}
-		self.data['stim'] = np.zeros(2)      
-		self.data['resp_b'] = np.zeros(2)    
-		self.data['resp_r'] = np.zeros(2)     
-		self.data['gain_r'] = np.zeros(2)    
-		self.data['resp_ir'] = np.zeros(2)   
-		self.data['resp_e'] = np.zeros(2)     
-		self.data['beta'] = np.zeros(2)      
-		self.data['beta_e'] = np.zeros(2)    
-		self.data['resp_q'] = np.zeros(2)    
-		self.data['tau_x'] = np.zeros(2)     
-		self.data['gain_x'] = np.zeros(2)    
-		self.data['resp_x'] = np.zeros(2)    
-		self.data['resp_os'] = np.zeros(2)   
-		self.data['resp_c'] = np.zeros(2)    
-		self.data['resp_vc'] = np.zeros(2)   
-		self.data['resp_is'] = np.zeros(2)   
-		self.data['resp_im'] = np.zeros(2)   
-		self.data['atten_i'] = np.zeros(2)   
+		self.data = {'stim': np.zeros(2), 'resp_b': np.zeros(2), 'resp_r': np.zeros(2),
+					'gain_r': np.zeros(2), 'resp_ir': np.zeros(2), 'resp_e': np.zeros(2),     
+					'beta': np.zeros(2), 'beta_e': np.zeros(2), 'resp_q': np.zeros(2),    
+					'tau_x': np.zeros(2), 'gain_x': np.zeros(2), 'resp_x': np.zeros(2),    
+					'resp_os': np.zeros(2), 'resp_c': np.zeros(2), 
+					'resp_vc': np.zeros(2), 'resp_is': np.zeros(2),   
+					'resp_im': np.zeros(2), 'atten_i': np.zeros(2), }
 
 	def _gen_constants(self):
 		'''
@@ -183,7 +172,8 @@ class cone(object):
 		'''
 
 		nprev = 1
-		self.td = self.stimulus[0]  # assumed steady - state intensity,  used by 'steady'
+		# assumed steady - state intensity,  used by 'steady'
+		self.td = self.stimulus[0]  
 		self.data['resp_c'][nprev] = fsolve(self.steady, 1)[0]
 		self.data['stim'][nprev] = self.td
 
@@ -205,28 +195,31 @@ class cone(object):
 								(stimn + 1) / stimn) ** 2 + 4 * self.const['rk_b'])))
 
 			self.data['resp_r'][nprev] = ((1 - self.data['resp_b'][nprev]) * 
-										self.data['stim'][nprev] / (1 + stimn))
+								self.data['stim'][nprev] / (1 + stimn))
 			self.data['gain_r'][nprev] = (1 - self.data['resp_b'][nprev] - 
-										self.const['cn'] * self.data['resp_r'][nprev])
-			self.data['resp_ir'][nprev] = self.data['gain_r'][nprev] * self.data['stim'][nprev]
+								self.const['cn'] * self.data['resp_r'][nprev])
+			self.data['resp_ir'][nprev] = (self.data['gain_r'][nprev] * 
+							self.data['stim'][nprev])
 			self.data['resp_e'][nprev] = self.data['resp_r'][nprev]
 
 		self.data['beta'][nprev] = (self.const['c_beta'] + self.const['rk_beta'] * 
 									self.data['resp_e'][nprev])
 		self.data['beta_e'][nprev] = (self.data['beta'][nprev] / (1 + 
-									self.data['beta'][nprev] / self.const['beta_e_max']))
+							self.data['beta'][nprev] / self.const['beta_e_max']))
 		self.data['resp_q'][nprev] = 1 / self.data['beta_e'][nprev]
 		# express tau_x in time steps
 		self.data['tau_x'][nprev] = self.data['resp_q'][nprev] * self.const['nstep'] 
 		self.data['gain_x'][nprev] = (1 / (1 + (self.const['a_c'] * 
-									self.data['resp_c'][nprev]) ** self.const['rnc']))
-		#print self.data['gain_x'], self.const['a_c'], self.data['resp_c']
-		self.data['resp_x'][nprev] = self.data['gain_x'][nprev] * self.data['resp_q'][nprev]
+							self.data['resp_c'][nprev]) ** self.const['rnc']))
+
+		self.data['resp_x'][nprev] = (self.data['gain_x'][nprev] * 
+							self.data['resp_q'][nprev])
 		self.data['resp_os'][nprev] = self.data['resp_x'][nprev] ** self.const['rnx']
-		self.data['resp_vc'][nprev] = ((self.data['resp_os'][nprev] / self.const['a_is']) ** 
-											(1 / (1 + self.const['gamma_is'])))
+		self.data['resp_vc'][nprev] = ((self.data['resp_os'][nprev] / 
+							self.const['a_is']) ** (1 / (1 + self.const['gamma_is'])))
 		self.data['resp_is'][nprev] = self.data['resp_vc'][nprev]
-		self.data['resp_im'][nprev] = self.data['resp_is'][nprev] ** self.const['gamma_is']
+		self.data['resp_im'][nprev] = (self.data['resp_is'][nprev] ** 
+							self.const['gamma_is'])
 		self.data['atten_i'][nprev] = self.const['a_is'] * self.data['resp_im'][nprev]
 		
 
@@ -234,8 +227,7 @@ class cone(object):
 		'''
 		'''
 		nstim = len(self.stimulus)
-
-		response = np.zeros(nstim)      # speeds up matlab
+		response = np.zeros(nstim)
 
 		for istim in range(0, nstim):
 
@@ -251,15 +243,16 @@ class cone(object):
 
 				self.data['stim'][ncurr] = self.stimulus[istim] 
 
-				self.data['resp_ir'][ncurr] = self.data['gain_r'][nprev] * self.data['stim'][ncurr]
+				self.data['resp_ir'][ncurr] = (self.data['gain_r'][nprev] * 
+							self.data['stim'][ncurr])
 				
 				self.data['resp_r'][ncurr] = (self.time_k['f1_tau_r'] * 
-								self.data['resp_r'][nprev] + self.time_k['f2_tau_r'] * 
-								self.data['resp_ir'][nprev] + self.time_k['f3_tau_r'] * 
-								self.data['resp_ir'][ncurr])
+							self.data['resp_r'][nprev] + self.time_k['f2_tau_r'] * 
+							self.data['resp_ir'][nprev] + self.time_k['f3_tau_r'] * 
+							self.data['resp_ir'][ncurr])
 				
 				tau_b = self.const['tau_b0'] * (self.data['resp_b'][nprev] + 
-									self.const['rk_b']) / self.const['rk_b']
+							self.const['rk_b']) / self.const['rk_b']
 				
 				gain_b = self.const['cn'] * tau_b / self.const['tau_r']
 				
@@ -268,57 +261,64 @@ class cone(object):
 				f3_tau_b = gain_b * (1 - tau_b + tau_b * f1_tau_b)
 				
 				self.data['resp_b'][ncurr] = (f1_tau_b * self.data['resp_b'][nprev] + 
-											f2_tau_b * self.data['resp_r'][nprev] + 
-								  			f3_tau_b * self.data['resp_r'][ncurr])
+							f2_tau_b * self.data['resp_r'][nprev] + 
+							f3_tau_b * self.data['resp_r'][ncurr])
 				
 				self.data['gain_r'][ncurr] = (1 - self.data['resp_b'][ncurr] -
-											self.const['cn'] * self.data['resp_r'][ncurr])
+							self.const['cn'] * self.data['resp_r'][ncurr])
 				 
 				self.data['resp_e'][ncurr] = (self.time_k['f1_tau_e'] * 
-									self.data['resp_e'][nprev] + self.time_k['f2_tau_e'] * 
-									self.data['resp_r'][nprev] + self.time_k['f3_tau_e'] * 
-									self.data['resp_r'][ncurr])
+							self.data['resp_e'][nprev] + self.time_k['f2_tau_e'] * 
+							self.data['resp_r'][nprev] + self.time_k['f3_tau_e'] * 
+							self.data['resp_r'][ncurr])
 
 				self.data['beta'][ncurr] = (self.const['c_beta'] + 
-											self.const['rk_beta'] * self.data['resp_e'][ncurr])
+							self.const['rk_beta'] * self.data['resp_e'][ncurr])
 				self.data['beta_e'][ncurr] = (self.data['beta'][ncurr] / 
-										(1 + self.data['beta'][ncurr] / self.const['beta_e_max']))
+							(1 + self.data['beta'][ncurr] / self.const['beta_e_max']))
 				self.data['resp_q'][ncurr] = 1 / self.data['beta_e'][ncurr]
 
 				# express tau_x in time steps
-				self.data['tau_x'][ncurr] = self.data['resp_q'][ncurr] * self.const['nstep']    
+				self.data['tau_x'][ncurr] = (self.data['resp_q'][ncurr] * 
+							self.const['nstep'])
 				f1_tau_x = np.exp( - 1 / self.data['tau_x'][ncurr])
-				f2_tau_x = self.data['tau_x'][ncurr] - (1 + self.data['tau_x'][ncurr]) * f1_tau_x
-				f3_tau_x = 1 - self.data['tau_x'][ncurr] + self.data['tau_x'][ncurr] * f1_tau_x
+				f2_tau_x = (self.data['tau_x'][ncurr] - 
+							(1 + self.data['tau_x'][ncurr]) * f1_tau_x)
+				f3_tau_x = (1 - self.data['tau_x'][ncurr] + 
+							self.data['tau_x'][ncurr] * f1_tau_x)
 
 				self.data['resp_x'][ncurr] = (f1_tau_x * self.data['resp_x'][nprev] + 
-							self.data['gain_x'][nprev] * f2_tau_x * self.data['resp_q'][nprev] + 
-							self.data['gain_x'][nprev] * f3_tau_x * self.data['resp_q'][ncurr])
-				#print self.data['resp_x'], self.data['gain_x'][nprev]
+							self.data['gain_x'][nprev] * f2_tau_x * 
+							self.data['resp_q'][nprev] + self.data['gain_x'][nprev] * 
+							f3_tau_x * self.data['resp_q'][ncurr])
+
 				
-				self.data['resp_os'][ncurr] = self.data['resp_x'][ncurr] ** self.const['rnx']
-				           
-				self.data['resp_c'][ncurr] = (self.time_k['f1_tau_c'] * self.data['resp_c'][nprev] +
-									self.time_k['f2_tau_c'] * self.data['resp_os'][nprev] + 
-								  	self.time_k['f3_tau_c'] * self.data['resp_os'][ncurr])
+				self.data['resp_os'][ncurr] = (self.data['resp_x'][ncurr] ** 
+							self.const['rnx'])
+				          
+				self.data['resp_c'][ncurr] = (self.time_k['f1_tau_c'] * 
+							self.data['resp_c'][nprev] + self.time_k['f2_tau_c'] * 
+							self.data['resp_os'][nprev] + self.time_k['f3_tau_c'] * 
+							self.data['resp_os'][ncurr])
 				 
 				self.data['gain_x'][ncurr] = (1 / (1 + (self.const['a_c'] * 
-												self.data['resp_c'][ncurr]) ** self.const['rnc']))
+							self.data['resp_c'][ncurr]) ** self.const['rnc']))
 				   
 				self.data['resp_vc'][ncurr] = (self.data['resp_os'][ncurr] / 
-										self.data['atten_i'][nprev] )
+							self.data['atten_i'][nprev] )
 				
 				self.data['resp_is'][ncurr] = (self.time_k['f1_tau_vc'] * 
-										self.data['resp_is'][nprev] + self.time_k['f2_tau_vc'] * 
-										self.data['resp_vc'][nprev] + self.time_k['f3_tau_vc'] * 
-										self.data['resp_vc'][ncurr])
+							self.data['resp_is'][nprev] + self.time_k['f2_tau_vc'] * 
+							self.data['resp_vc'][nprev] + self.time_k['f3_tau_vc'] * 
+							self.data['resp_vc'][ncurr])
 				 
-				self.data['resp_im'][ncurr] = self.data['resp_is'][ncurr] ** self.const['gamma_is']
+				self.data['resp_im'][ncurr] = (self.data['resp_is'][ncurr] ** 
+							self.const['gamma_is'])
 				   
 				self.data['atten_i'][ncurr] = (self.time_k['f1_tau_is'] * 
-								self.data['atten_i'][nprev] + self.time_k['f2_tau_is'] * 
-								self.data['resp_im'][nprev] + self.time_k['f3_tau_is'] * 
-								self.data['resp_im'][ncurr])      
+							self.data['atten_i'][nprev] + self.time_k['f2_tau_is'] * 
+							self.data['resp_im'][nprev] + self.time_k['f3_tau_is'] * 
+							self.data['resp_im'][ncurr])      
 				
 			resp_norm = ((self.data['resp_is'][ncurr] - self.dark['resp_is']) /
 								self.dark['resp_is'] )
@@ -344,18 +344,19 @@ class cone(object):
 		else:
 		 	stimn = self.td * self.const['cn']
 		 	resp_b = (0.5 * (1 - self.const['rk_b'] - self.const['tau_r'] / 
-		 					self.const['tau_b0'] * self.const['rk_b'] * (stimn + 1) / stimn +
-		 			     	np.sqrt((1 - self.const['rk_b'] - self.const['tau_r'] / 
-		 			     	self.const['tau_b0'] * self.const['rk_b'] * 
-		 			     	(stimn + 1) / stimn) ** 2 + 4 * self.const['rk_b'])))
+		 				self.const['tau_b0'] * self.const['rk_b'] * (stimn + 1) / 
+		 				stimn + np.sqrt((1 - self.const['rk_b'] - 
+		 				self.const['tau_r'] / self.const['tau_b0'] * 
+		 				self.const['rk_b'] * (stimn + 1) / stimn) ** 2 + 4 * 
+		 				self.const['rk_b'])))
 		 	resp_r = (1 - resp_b) * stim / (1 + stimn)
 		 	resp_e = resp_r
 
 		beta = self.const['c_beta'] + self.const['rk_beta'] * resp_e
 		beta_e = beta / (1 + beta / self.const['beta_e_max'])
 
-		return (x  -  ((1  /  (1  +  (self.const['a_c']  *  x)  **  self.const['rnc'])) /
-					beta_e)  **  self.const['rnx'])
+		return (x  -  ((1  /  (1  +  (self.const['a_c']  *  x)  **  
+				self.const['rnc'])) / beta_e)  **  self.const['rnx'])
 
 
 def plot_cone():
