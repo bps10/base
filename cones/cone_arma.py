@@ -35,7 +35,7 @@ class cone(object):
 		sensitivity = s.neitz(LambdaMax=peak_sens, OpticalDensity=0.4, LOG=False,
                 	StartWavelength=wvlen, EndWavelength=wvlen, 
                 	resolution=1, EXTINCTION=False)
-		self.stimulus = self.load_stimulus()
+		self.stimulus = self.gen_stimulus()
 		self.stimulus = self.stimulus * sensitivity
 		self.get_adaptive_states()
 		
@@ -144,7 +144,7 @@ class cone(object):
 		self.time_k['f3_tau_is'] = self.const['a_is'] * (1 - self.const['tau_is'] + 
 								self.const['tau_is'] * self.time_k['f1_tau_is'])            
 	
-	def load_stimulus(self):
+	def gen_stimulus(self):
 		'''
 		'''
 		return np.genfromtxt('base/cones/stimulus.txt')
