@@ -25,19 +25,13 @@ class cone(object):
 	    Subsequent development by B.P. Schmidt
 '''
 
-	def __init__(self, wvlen=559, peak_sens=559):
+	def __init__(self):
 		'''
 		'''
 		self._gen_data_container()
 		self._gen_constants()
-		self._gen_time_constants()
+		self._gen_filter_constants()
 		self.get_dark_values()
-		sensitivity = s.neitz(LambdaMax=peak_sens, OpticalDensity=0.4, LOG=False,
-                	StartWavelength=wvlen, EndWavelength=wvlen, 
-                	resolution=1, EXTINCTION=False)
-		self.stimulus = self.gen_stimulus()
-		self.stimulus = self.stimulus * sensitivity
-		self.get_adaptive_states()
 		
 	def _gen_data_container(self):
 		'''
@@ -110,44 +104,46 @@ class cone(object):
 		self.const['tau_is'] = 90 * self.const['nstep']
 		self.const['a_is'] = 2.9e-2            
 
-	def _gen_time_constants(self):
+	def _gen_filter_constants(self):
 		'''
 		'''
-		self.time_k = {}
-		self.time_k['f1_tau_r'] = np.exp( - 1 / self.const['tau_r'])
-		self.time_k['f2_tau_r'] = (self.const['tau_r'] - (1 + self.const['tau_r']) *
-									self.time_k['f1_tau_r'])
-		self.time_k['f3_tau_r'] = (1 - self.const['tau_r'] + self.const['tau_r'] *
-									self.time_k['f1_tau_r'])
+		self.k = {}
+		self.k['f1_tau_r'] = np.exp( - 1 / self.const['tau_r'])
+		self.k['f2_tau_r'] = (self.const['tau_r'] - (1 + self.const['tau_r']) *
+									self.k['f1_tau_r'])
+		self.k['f3_tau_r'] = (1 - self.const['tau_r'] + self.const['tau_r'] *
+									self.k['f1_tau_r'])
 		      
-		self.time_k['f1_tau_e'] = np.exp( - 1 / self.const['tau_e'])
-		self.time_k['f2_tau_e'] = (self.const['tau_e'] - (1 + self.const['tau_e']) * 
-									self.time_k['f1_tau_e'])
-		self.time_k['f3_tau_e'] = (1 - self.const['tau_e'] + self.const['tau_e'] * 
-									self.time_k['f1_tau_e'])
+		self.k['f1_tau_e'] = np.exp( - 1 / self.const['tau_e'])
+		self.k['f2_tau_e'] = (self.const['tau_e'] - (1 + self.const['tau_e']) * 
+									self.k['f1_tau_e'])
+		self.k['f3_tau_e'] = (1 - self.const['tau_e'] + self.const['tau_e'] * 
+									self.k['f1_tau_e'])
 		      
-		self.time_k['f1_tau_c'] = np.exp( - 1 / self.const['tau_c'])
-		self.time_k['f2_tau_c'] = (self.const['tau_c'] - (1 + self.const['tau_c']) * 
-									self.time_k['f1_tau_c'])
-		self.time_k['f3_tau_c'] = (1 - self.const['tau_c'] + self.const['tau_c'] * 
-									self.time_k['f1_tau_c'])
+		self.k['f1_tau_c'] = np.exp( - 1 / self.const['tau_c'])
+		self.k['f2_tau_c'] = (self.const['tau_c'] - (1 + self.const['tau_c']) * 
+									self.k['f1_tau_c'])
+		self.k['f3_tau_c'] = (1 - self.const['tau_c'] + self.const['tau_c'] * 
+									self.k['f1_tau_c'])
 		      
-		self.time_k['f1_tau_vc'] = np.exp( - 1 / self.const['tau_vc'])
-		self.time_k['f2_tau_vc'] = (self.const['tau_vc'] - (1 + self.const['tau_vc']) * 
-									self.time_k['f1_tau_vc'])
-		self.time_k['f3_tau_vc'] = (1 - self.const['tau_vc'] + self.const['tau_vc'] * 
-									self.time_k['f1_tau_vc'])
+		self.k['f1_tau_vc'] = np.exp( - 1 / self.const['tau_vc'])
+		self.k['f2_tau_vc'] = (self.const['tau_vc'] - (1 + self.const['tau_vc']) * 
+									self.k['f1_tau_vc'])
+		self.k['f3_tau_vc'] = (1 - self.const['tau_vc'] + self.const['tau_vc'] * 
+									self.k['f1_tau_vc'])
 		      
-		self.time_k['f1_tau_is'] = np.exp( - 1 / self.const['tau_is'])
-		self.time_k['f2_tau_is'] = self.const['a_is'] * (self.const['tau_is'] - 
-								(1 + self.const['tau_is']) * self.time_k['f1_tau_is'])
-		self.time_k['f3_tau_is'] = self.const['a_is'] * (1 - self.const['tau_is'] + 
-								self.const['tau_is'] * self.time_k['f1_tau_is'])            
+		self.k['f1_tau_is'] = np.exp( - 1 / self.const['tau_is'])
+		self.k['f2_tau_is'] = self.const['a_is'] * (self.const['tau_is'] - 
+								(1 + self.const['tau_is']) * self.k['f1_tau_is'])
+		self.k['f3_tau_is'] = self.const['a_is'] * (1 - self.const['tau_is'] + 
+								self.const['tau_is'] * self.k['f1_tau_is'])            
 	
-	def gen_stimulus(self):
+	def set_stimulus(self, stimulus):
 		'''
 		'''
-		return np.genfromtxt('base/cones/stimulus.txt')
+		self.stimulus = stimulus
+		# use first value of stimulus as adaption state
+		self.get_adaptive_states()
 
 	def get_dark_values(self):
 		'''
@@ -230,7 +226,6 @@ class cone(object):
 		response = np.zeros(nstim)
 
 		for istim in range(0, nstim):
-
 			for istep in range(0, self.const['nstep']):
 			   
 				if istim == 0 and istep == 0:
@@ -246,9 +241,9 @@ class cone(object):
 				self.data['resp_ir'][ncurr] = (self.data['gain_r'][nprev] * 
 							self.data['stim'][ncurr])
 				
-				self.data['resp_r'][ncurr] = (self.time_k['f1_tau_r'] * 
-							self.data['resp_r'][nprev] + self.time_k['f2_tau_r'] * 
-							self.data['resp_ir'][nprev] + self.time_k['f3_tau_r'] * 
+				self.data['resp_r'][ncurr] = (self.k['f1_tau_r'] * 
+							self.data['resp_r'][nprev] + self.k['f2_tau_r'] * 
+							self.data['resp_ir'][nprev] + self.k['f3_tau_r'] * 
 							self.data['resp_ir'][ncurr])
 				
 				tau_b = self.const['tau_b0'] * (self.data['resp_b'][nprev] + 
@@ -267,9 +262,9 @@ class cone(object):
 				self.data['gain_r'][ncurr] = (1 - self.data['resp_b'][ncurr] -
 							self.const['cn'] * self.data['resp_r'][ncurr])
 				 
-				self.data['resp_e'][ncurr] = (self.time_k['f1_tau_e'] * 
-							self.data['resp_e'][nprev] + self.time_k['f2_tau_e'] * 
-							self.data['resp_r'][nprev] + self.time_k['f3_tau_e'] * 
+				self.data['resp_e'][ncurr] = (self.k['f1_tau_e'] * 
+							self.data['resp_e'][nprev] + self.k['f2_tau_e'] * 
+							self.data['resp_r'][nprev] + self.k['f3_tau_e'] * 
 							self.data['resp_r'][ncurr])
 
 				self.data['beta'][ncurr] = (self.const['c_beta'] + 
@@ -296,9 +291,9 @@ class cone(object):
 				self.data['resp_os'][ncurr] = (self.data['resp_x'][ncurr] ** 
 							self.const['rnx'])
 				          
-				self.data['resp_c'][ncurr] = (self.time_k['f1_tau_c'] * 
-							self.data['resp_c'][nprev] + self.time_k['f2_tau_c'] * 
-							self.data['resp_os'][nprev] + self.time_k['f3_tau_c'] * 
+				self.data['resp_c'][ncurr] = (self.k['f1_tau_c'] * 
+							self.data['resp_c'][nprev] + self.k['f2_tau_c'] * 
+							self.data['resp_os'][nprev] + self.k['f3_tau_c'] * 
 							self.data['resp_os'][ncurr])
 				 
 				self.data['gain_x'][ncurr] = (1 / (1 + (self.const['a_c'] * 
@@ -307,24 +302,24 @@ class cone(object):
 				self.data['resp_vc'][ncurr] = (self.data['resp_os'][ncurr] / 
 							self.data['atten_i'][nprev] )
 				
-				self.data['resp_is'][ncurr] = (self.time_k['f1_tau_vc'] * 
-							self.data['resp_is'][nprev] + self.time_k['f2_tau_vc'] * 
-							self.data['resp_vc'][nprev] + self.time_k['f3_tau_vc'] * 
+				self.data['resp_is'][ncurr] = (self.k['f1_tau_vc'] * 
+							self.data['resp_is'][nprev] + self.k['f2_tau_vc'] * 
+							self.data['resp_vc'][nprev] + self.k['f3_tau_vc'] * 
 							self.data['resp_vc'][ncurr])
 				 
 				self.data['resp_im'][ncurr] = (self.data['resp_is'][ncurr] ** 
 							self.const['gamma_is'])
 				   
-				self.data['atten_i'][ncurr] = (self.time_k['f1_tau_is'] * 
-							self.data['atten_i'][nprev] + self.time_k['f2_tau_is'] * 
-							self.data['resp_im'][nprev] + self.time_k['f3_tau_is'] * 
+				self.data['atten_i'][ncurr] = (self.k['f1_tau_is'] * 
+							self.data['atten_i'][nprev] + self.k['f2_tau_is'] * 
+							self.data['resp_im'][nprev] + self.k['f3_tau_is'] * 
 							self.data['resp_im'][ncurr])      
 				
 			resp_norm = ((self.data['resp_is'][ncurr] - self.dark['resp_is']) /
 								self.dark['resp_is'] )
 			response[istim] = resp_norm
 
-		return self.stimulus, response
+		return response
 
 	def steady(self, x):
 		''' 
@@ -362,10 +357,14 @@ class cone(object):
 def plot_cone():
 	'''
 	'''
-	from base import plot as pf
-
+	
+	'''sensitivity = s.neitz(LambdaMax=559, OpticalDensity=0.4, LOG=False,
+            	StartWavelength=wvlen, EndWavelength=wvlen, 
+            	resolution=1, EXTINCTION=False)'''
+	stimulus = np.genfromtxt('base/cones/stimulus.txt')
 	c = cone()
-	stimulus, response = c.simulate()
+	c.set_stimulus(stimulus)
+	response = c.simulate()
 
 	fig  = plt.figure(figsize=(10, 8))
 	ax1 = fig.add_subplot(211)
@@ -384,6 +383,98 @@ def plot_cone():
 	plt.tight_layout()
 	plt.show()
 
+def plot_frequencies():
+	'''
+	'''
+	x = np.arange(0, np.pi, 0.001)
+	sinewave = (1000 * np.sin(x * 1)) + 5000
+	c = cone()
+	c.set_stimulus(sinewave)
+	response1 = c.simulate()
+
+	sinewave = (1000 * np.sin(x * 25)) + 5000
+	c = cone()
+	c.set_stimulus(sinewave)
+	response2 = c.simulate()
+
+	sinewave = (1000 * np.sin(x * 50)) + 5000
+	c = cone()
+	c.set_stimulus(sinewave)
+	response3 = c.simulate()	
+
+	sinewave = (1000 * np.sin(x * 150)) + 5000
+	c = cone()
+	c.set_stimulus(sinewave)
+	response4 = c.simulate()
+
+
+	fig  = plt.figure(figsize=(10, 8))
+	ax1 = fig.add_subplot(411)
+	ax2 = fig.add_subplot(412)
+	ax3 = fig.add_subplot(413)
+	ax4 = fig.add_subplot(414)
+
+	pf.AxisFormat()
+	pf.TufteAxis(ax1, ['left'], [5, 5])
+	pf.TufteAxis(ax2, ['left'], [5, 5])
+	pf.TufteAxis(ax3, ['left'], [5, 5])
+	pf.TufteAxis(ax4, ['left'], [5, 5])
+
+	ax1.plot(x, response1, 'k')
+	ax2.plot(x, response2, 'k')
+	ax3.plot(x, response3, 'k')
+	ax4.plot(x, response4, 'k')
+
+
+
+	ax1.set_ylabel('luminance (td)')
+	#ax2.set_ylabel('normalized response')
+	#ax3.set_ylabel('normalized response')
+	#ax4.set_ylabel('normalized response')
+	ax4.set_xlabel('time')
+
+	#ax4.set_xlim([min(x), max(x)])
+
+	plt.tight_layout()
+	plt.show()
+
+
+def temporal_sensitivity(background_illum=1000, contrast=100):
+	'''
+	'''
+	
+	x = np.arange(0, np.pi * 2, 0.001)
+	amp = []
+	freqs = 10 ** np.arange(0, 3, 0.1)
+
+	k = background_illum * (contrast / 100.)
+	for freq in freqs:
+		sinewave = (k * np.sin(x * freq)) + background_illum
+		c = cone()
+		c.set_stimulus(sinewave)
+		response = c.simulate()
+		amp.append(abs(np.max(response) - np.min(response)))
+	amp = np.asarray(amp)
+
+	fig  = plt.figure()
+	ax1 = fig.add_subplot(111)
+
+	pf.AxisFormat()
+	pf.TufteAxis(ax1, ['left', 'bottom'], [5, 5])
+
+	ax1.semilogx(freqs, amp / np.max(amp), 'ko-')
+
+	ax1.set_xlabel('frequency (Hz)')
+	ax1.set_ylabel('sensitivity')
+
+	plt.tight_layout()
+	plt.show()
+
+
+
 if __name__ == '__main__':
 
-	plot_cone()
+	from base import plot as pf
+	temporal_sensitivity()
+	#plot_frequencies()
+	#plot_cone()

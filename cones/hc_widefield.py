@@ -87,32 +87,32 @@ class cone_hc(object):
         '''
         self.k = {}
         self.k['nrate'] = 10000                ##timesteps  /  sec (delta_t = 100 us)
-        self.k['ratefrac'] =  self.k['nrate']  /  1000.   #conversion 1 ms to 100 us timebase
-        self.k['nlen'] = int(300. * self.k['ratefrac'])   #300 ms stimulus duration
-        self.k['nstim_max'] = 5 * self.k['nrate']          #maximum stimulus length 5 sec
+        self.k['ratefrac'] =  self.k['nrate']  /  1000. #conversion 1 ms to 100 us timebase
+        self.k['nlen'] = int(300. * self.k['ratefrac']) #300 ms stimulus duration
+        self.k['nstim_max'] = 5 * self.k['nrate']       #maximum stimulus length 5 sec
         self.k['stim_prev'] = 100.                      #assumed illuminance before start stimulus
-        self.k['tau_r'] = 0.49 * self.k['ratefrac']                #parameter tau_r in model
-        self.k['tau_e'] = 16.8 * self.k['ratefrac']                #parameter tau_e in model
+        self.k['tau_r'] = 0.49 * self.k['ratefrac']     #parameter tau_r in model
+        self.k['tau_e'] = 16.8 * self.k['ratefrac']     #parameter tau_e in model
         self.k['beta_0'] = 2.80e-3                      #parameter c_beta in model
         self.k['g_ex0'] = 1.63e-4                       #parameter k_beta in model
         self.k['rnx'] = 1.                              #parameter n_x in model
         self.k['rnc'] = 4.                              #parameter n_c in model
-        self.k['tau_c'] = 2.89 * self.k['ratefrac']                #parameter tau_c in model
+        self.k['tau_c'] = 2.89 * self.k['ratefrac']     #parameter tau_c in model
         self.k['a_c'] = 9.08e-2                         #parameter a_c in model
-        self.k['tau_vc'] = 4. * self.k['ratefrac']                 #parameter tau_m in model
+        self.k['tau_vc'] = 4. * self.k['ratefrac']      #parameter tau_m in model
         self.k['gamma_is'] = 0.678                      #parameter gamma_is in model
-        self.k['tau_is'] = 56.9 * self.k['ratefrac']               #parameter tau_is in model
+        self.k['tau_is'] = 56.9 * self.k['ratefrac']    #parameter tau_is in model
         self.k['a_is'] = 7.09e-2                        #parameter a_is in model
         self.k['ripmax'] = 151.1                        #parameter g_t in model
-        self.k['vk'] =  - 10.                             #parameter v_k in model
+        self.k['vk'] =  - 10.                           #parameter v_k in model
         self.k['vn'] = 3.                               #parameter v_n in model
-        self.k['tau_tr'] = 4. * self.k['ratefrac']                 #parameter tau_1 in model 
-        self.k['tau_ih'] = 4. * self.k['ratefrac']                 #parameter tau_2 in model 
-        self.k['tau_h'] = 20. * self.k['ratefrac']                 #parameter tau_h in model 
-        self.k['rdel'] = 2.82 * self.k['ratefrac']                 #overall delay
+        self.k['tau_tr'] = 4. * self.k['ratefrac']      #parameter tau_1 in model 
+        self.k['tau_ih'] = 4. * self.k['ratefrac']      #parameter tau_2 in model 
+        self.k['tau_h'] = 20. * self.k['ratefrac']      #parameter tau_h in model 
+        self.k['rdel'] = 2.82 * self.k['ratefrac']      #overall delay
         self.k['vh0'] = 19.7                            #parameter V_I in model 
         self.k['rho'] = 0.733                           #parameter mu in model 
-        self.k['tau_h0'] = 250. * self.k['ratefrac']               #parameter tau_a in model 
+        self.k['tau_h0'] = 250. * self.k['ratefrac']    #parameter tau_a in model 
 
     def _gen_time_constants(self):
         '''calculate ARMA coefficients of fixed filters
@@ -120,32 +120,46 @@ class cone_hc(object):
 
         self.time_k = {}
         self.time_k['f1_tau_r'] = np.exp( - 1. / self.k['tau_r'])
-        self.time_k['f2_tau_r'] = (self.k['tau_r'] - (1.  +  self.k['tau_r']) * self.time_k['f1_tau_r'])
-        self.time_k['f3_tau_r'] = (1. - self.k['tau_r'] + self.k['tau_r'] * self.time_k['f1_tau_r'])
+        self.time_k['f2_tau_r'] = (self.k['tau_r'] - (1.  +  self.k['tau_r']) * 
+                self.time_k['f1_tau_r'])
+        self.time_k['f3_tau_r'] = (1. - self.k['tau_r'] + self.k['tau_r'] * 
+                self.time_k['f1_tau_r'])
 
         self.time_k['f1_tau_e'] = np.exp( - 1. / self.k['tau_e'])
-        self.time_k['f2_tau_e'] = (self.k['tau_e'] - (1. + self.k['tau_e']) * self.time_k['f1_tau_e'])
-        self.time_k['f3_tau_e'] = (1. - self.k['tau_e'] + self.k['tau_e'] * self.time_k['f1_tau_e'])
+        self.time_k['f2_tau_e'] = (self.k['tau_e'] - (1. + self.k['tau_e']) *
+                self.time_k['f1_tau_e'])
+        self.time_k['f3_tau_e'] = (1. - self.k['tau_e'] + self.k['tau_e'] * 
+                self.time_k['f1_tau_e'])
 
         self.time_k['f1_tau_c'] = np.exp( - 1. / self.k['tau_c'])
-        self.time_k['f2_tau_c'] = (self.k['tau_c'] - (1. + self.k['tau_c']) * self.time_k['f1_tau_c'])
-        self.time_k['f3_tau_c'] = (1. - self.k['tau_c'] + self.k['tau_c'] * self.time_k['f1_tau_c'])
+        self.time_k['f2_tau_c'] = (self.k['tau_c'] - (1. + self.k['tau_c']) *
+                self.time_k['f1_tau_c'])
+        self.time_k['f3_tau_c'] = (1. - self.k['tau_c'] + self.k['tau_c'] * 
+                self.time_k['f1_tau_c'])
 
         self.time_k['f1_tau_vc'] = np.exp( - 1. / self.k['tau_vc'])
-        self.time_k['f2_tau_vc'] = (self.k['tau_vc'] - (1. + self.k['tau_vc']) * self.time_k['f1_tau_vc'])
-        self.time_k['f3_tau_vc'] = (1. - self.k['tau_vc'] + self.k['tau_vc'] * self.time_k['f1_tau_vc'])
+        self.time_k['f2_tau_vc'] = (self.k['tau_vc'] - (1. + self.k['tau_vc']) * 
+                self.time_k['f1_tau_vc'])
+        self.time_k['f3_tau_vc'] = (1. - self.k['tau_vc'] + self.k['tau_vc'] * 
+                self.time_k['f1_tau_vc'])
 
         self.time_k['f1_tau_is'] = np.exp( - 1. / self.k['tau_is'])
-        self.time_k['f2_tau_is'] = self.k['a_is'] * (self.k['tau_is'] - (1. + self.k['tau_is']) * self.time_k['f1_tau_is'])
-        self.time_k['f3_tau_is'] = self.k['a_is'] * (1. - self.k['tau_is'] + self.k['tau_is'] * self.time_k['f1_tau_is'])
+        self.time_k['f2_tau_is'] = (self.k['a_is'] * (self.k['tau_is'] - 
+                    (1. + self.k['tau_is']) * self.time_k['f1_tau_is']))
+        self.time_k['f3_tau_is'] = (self.k['a_is'] * (1. - self.k['tau_is'] + 
+                    self.k['tau_is'] * self.time_k['f1_tau_is']))
 
         self.time_k['f1_tau_tr'] = np.exp( - 1. / self.k['tau_tr'])
-        self.time_k['f2_tau_tr'] = self.k['tau_tr'] - (1. + self.k['tau_tr']) * self.time_k['f1_tau_tr']
-        self.time_k['f3_tau_tr'] = 1. - self.k['tau_tr'] + self.k['tau_tr'] * self.time_k['f1_tau_tr']
+        self.time_k['f2_tau_tr'] = (self.k['tau_tr'] - (1. + self.k['tau_tr']) * 
+                    self.time_k['f1_tau_tr'])
+        self.time_k['f3_tau_tr'] = (1. - self.k['tau_tr'] + self.k['tau_tr'] * 
+                    self.time_k['f1_tau_tr'])
 
         self.time_k['f1_tau_h0'] = np.exp( - 1. / self.k['tau_h0'])
-        self.time_k['f2_tau_h0'] = self.k['tau_h0'] - (1. + self.k['tau_h0']) * self.time_k['f1_tau_h0']
-        self.time_k['f3_tau_h0'] = 1. - self.k['tau_h0'] + self.k['tau_h0'] * self.time_k['f1_tau_h0']
+        self.time_k['f2_tau_h0'] = (self.k['tau_h0'] - (1. + self.k['tau_h0']) * 
+                    self.time_k['f1_tau_h0'])
+        self.time_k['f3_tau_h0'] = (1. - self.k['tau_h0'] + self.k['tau_h0'] * 
+                    self.time_k['f1_tau_h0'])
 
 
     def get_adaptive_states(self):
@@ -263,7 +277,7 @@ class cone_hc(object):
             self.data['resp_h'][ncurr] = (f1_tau_h * self.data['resp_h'][nprev] + f2_tau_h * 
             self.data['resp_ih'][nprev] + f3_tau_h * self.data['resp_ih'][ncurr])
 
-            self.data['resp_ar'][i] = self.data['resp_h'][ncurr]           #output of resp_h (replace
+            self.data['resp_ar'][i] = self.data['resp_h'][ncurr]   #output of resp_h (replace
                                                   #for obtaining other signals)
 
  
