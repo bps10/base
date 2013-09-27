@@ -439,22 +439,58 @@ def plot_frequencies():
 	plt.show()
 
 
-def temporal_sensitivity(background_illum=1000, contrast=100):
-	'''
-	'''
-	
-	x = np.arange(0, np.pi * 2, 0.001)
-	amp = []
-	freqs = 10 ** np.arange(0, 3, 0.1)
+x = np.arange(0, np.pi * 2, 0.005)
+background_illum=2000
+contrast = 100
+k = background_illum * (contrast / 100.)
 
-	k = background_illum * (contrast / 100.)
-	for freq in freqs:
-		sinewave = (k * np.sin(x * freq)) + background_illum
-		c = cone()
-		c.set_stimulus(sinewave)
-		response = c.simulate()
-		amp.append(abs(np.max(response) - np.min(response)))
-	amp = np.asarray(amp)
+
+def _parallel(freq):
+	'''
+	'''
+	c = cone()
+	sinewave = (k * np.sin(x * freq)) + background_illum
+	c.set_stimulus(sinewave)
+	response = c.simulate()
+	return response
+
+
+def temporal_sensitivity(background_illum=1000, contrast=100, 
+	parallel=True):
+	'''
+	'''
+
+	if parallel:
+		from multiprocessing import Pool, cpu_count
+		pool = Pool(processes=cpu_count())
+		freqs = 10 ** np.arange(0, 3, 0.1)
+		results = pool.map(_parallel, freqs)
+
+		amp = np.zeros(len(freqs))
+		for i, result in enumerate(results):
+			amp[i] = abs(np.max(result) - np.min(result))
+
+	else:
+		x = np.arange(0, np.pi * 2, 0.001)
+		amp = []
+		freqs = 10 ** np.arange(0, 3, 0.1)
+
+		k = background_illum * (contrast / 100.)
+
+		for freq in freqs:
+			sinewave = (k * np.sin(x * freq)) + background_illum
+			c = cone()
+			c.set_stimulus(sinewave)
+			response = c.simulate()
+			amp.append(abs(np.max(response) - np.min(response)))
+		amp = np.asarray(amp)
+
+	return freqs, amp
+
+def plot_temp_sens():
+	'''
+	'''
+	freqs, amp = temporal_sensitivity()
 
 	fig  = plt.figure()
 	ax1 = fig.add_subplot(111)
@@ -475,6 +511,6 @@ def temporal_sensitivity(background_illum=1000, contrast=100):
 if __name__ == '__main__':
 
 	from base import plot as pf
-	temporal_sensitivity()
+	plot_temp_sens()
 	#plot_frequencies()
 	#plot_cone()

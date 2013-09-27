@@ -161,7 +161,6 @@ class cone_hc(object):
         self.time_k['f3_tau_h0'] = (1. - self.k['tau_h0'] + self.k['tau_h0'] * 
                     self.time_k['f1_tau_h0'])
 
-
     def get_adaptive_states(self):
         '''determine adaptive state
         '''
