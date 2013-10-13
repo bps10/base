@@ -3,6 +3,8 @@ import os
 import unittest
 import numpy as np
 
+os.path.os.chdir('../')
+
 from base import spectsens as sp
 
 
@@ -31,6 +33,8 @@ class TestSpec(unittest.TestCase):
 
         sens = sp.stockmanfund(resolution=10)
         self.assertTrue(len(sens[:, 0]) == 39)
-        
+
+os.path.os.chdir('base/')        
+
 if __name__ == '__main__':
     unittest.main()
