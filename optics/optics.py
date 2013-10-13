@@ -2,6 +2,141 @@ from __future__ import division
 import numpy as np
 
 
+
+def genPSF(intensity, samples, gaussian_blur=True):
+    '''
+    '''
+    xvals = np.arange(0, samples)
+    PSF = np.zeros(samples)
+    PSFtotal = np.zeros((samples * 2) + 1)
+
+    # we have an integral, therefore take the deriv to get rays / bin
+    deriv = np.zeros((samples))
+    deriv[0] = intensity[0]
+    deriv[1:] = intensity[1:] - intensity[0:-1]
+
+    for i in range(0, samples - 1):
+
+        # account for increasing size of area
+        radius0 = xvals[i]
+        radius1 = xvals[i + 1]
+
+        # subtract inner and outer circle area to get sliver of interest
+        area = (np.pi * radius1 ** 2.0) - (np.pi * radius0 ** 2.0)
+
+        # deriv = amount in each circle; then divide by area
+        PSF[i] = deriv[i]  / area 
+
+    # normalize so that each PSF has same integral of 1.
+    #PSF = np.sqrt(PSF)
+    PSF = PSF / np.sum(PSF)
+
+    PSFtotal[1:samples + 1] = PSF[::-1]
+    PSFtotal[samples:-1] = PSF
+
+    if gaussian_blur:
+        gaussianFilter = gauss(np.arange(-samples, samples + 1), 2)
+        PSFtotal = np.convolve(PSFtotal, gaussianFilter, mode='same')
+
+
+    return PSF, PSFtotal
+
+
+def gauss(x, SD):
+    """A simple gaussian function with a mean of 0
+    """
+    return 1.0 * np.exp(-(x) ** 2 / (2 * SD ** 2))
+
+
+def genMTF(PSFtotal):
+    '''
+    '''
+    samples = len(PSFtotal)
+    MTF = np.zeros(samples / 2)
+
+    # make sure PSF is normalized
+    normPSF = PSFtotal / np.sum(PSFtotal)
+
+    # do the FFT, take only right half
+    temp = np.abs(np.fft.fftshift(np.fft.fft(normPSF)))
+    temp = temp[np.floor(samples / 2):-1]
+
+    # make sure we only get real part
+    MTF = np.real(temp)
+
+    return MTF
+
+
+def dlCutoffFreq(aperatureDiameter, focalplane, wavelength):
+    '''
+    '''
+    diam = aperatureDiameter / 1000.0
+    focalplane = focalplane / 1000.0
+    wl = wavelength * 1e-9
+    return diam / wl * focalplane
+
+
+def res_lim(pupil_size, wavelength):
+    '''
+    '''
+    wl = wavelength / 1000.0
+    return (pupil_size / wl) * (180.0 / np.pi)
+
+
+def diffraction(samples, pupil_size_mm, focal_len, ref_index=1.336, wavelength=550.0):
+    '''See Appendix B of "Light, the Retinal Image and Photoreceptors"
+    Packer & Williams.
+
+    or
+
+    "Optics of the human eye" Atchison and Smith, pg 195.
+
+    '''
+    #NA = NumericalAperature(ref_index, D=pupil_size_mm, focal_len=focal_len)
+
+    s_0 = dlCutoffFreq(pupil_size_mm, focal_len, wavelength) #NA / lam # convert to radians
+    s =  np.linspace(0, s_0, samples)
+    #print "NA: ", NA, "s_0", s_0
+
+    dif = (2.0 / np.pi) * (np.arccos(s / s_0) - 
+            (s / s_0) * np.sqrt(1.0 - (s / s_0) ** 2.0))
+
+    return dif, s
+
+def NumericalAperature(n, theta=None, D=None, focal_len=None):
+    '''
+    Find the numerical aperature of a system
+
+    :param n: refractive index
+    :param theta: angle of marginal rays
+
+    According to the formula
+
+    $$NA = n \\sin(\\theta)$$
+
+    or 
+
+    $$NA = n \\sin(\\arctan(\\frac{D}{2f}))$$
+       
+    '''
+    if D is None and focal_len is None and theta is not None:
+        out = n * np.sin(theta)
+    elif theta is None and D is not None and focal_len is not None:
+        out = n * np.sin(np.arctan(D / (2 * focal_len)))
+    else:
+        raise IOError("check parameters.")
+
+    return out
+
+def nextpow2(n):
+    '''
+    '''
+    m_f = np.log2(n)
+    m_i = np.ceil(m_f)
+
+    return 2 ** m_i
+
+
 def MTF(spatial_frequency,eccentricity, paper='Williams1996_astig'):
     """    
     Compute the modulation frequency transfer as a function of eccentricity
@@ -113,6 +248,7 @@ def MTF_Pupil(spatial_frequency, pupilDiameter, normalized = 0):
     
     return f
 
+
 def StilesCrawford1stKind(x, xmax, n, rho):
     """
     
@@ -129,47 +265,17 @@ def StilesCrawford1stKind(x, xmax, n, rho):
        This funciton is not finished or tested.
     """
     
-    return np.log(n) - rho*(x - xmax)**2
+    return np.log(n) - rho * (x - xmax) ** 2
 
     
     
-def SterhlRatio(sigma, lam):
+def StrehlRatio(diffraction, sample):
     """
-    Find the Sterhl ratio.
+    Find the Strehl ratio.
     
-    .. warning::
-       This funciton is not finished or tested.
-       
+    Send in peak of PSF for diffraction limited case and sample.
     """
     
-    return np.exp(-2.0 * np.pi * sigma / lam)**2.0
-
-    
-
-def NumericalAperature(n, theta):
-    """
-    Find the numerical aperature of a system
-    
-    .. warning::
-       Not really working. Untested.
-       
-    """
-    return n * np.sin(theta)
-
-    
-def DiffractionLimit(lam, n,theta):
-    """
-    
-    Find the diffraction limit of a system.
-    
-    :param lam: wavelength
-    :param n: 
-    :param theta:
-    
-    .. warning::
-       This funciton is not finished or tested.
-        
-    """
-    return lam / 2.0 * ( NumericalAperature(n, theta) )
+    return diffraction / sample
     
 

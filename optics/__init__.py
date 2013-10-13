@@ -1,2 +1,2 @@
-import filters
-import optics
+from filters import *
+from optics import *

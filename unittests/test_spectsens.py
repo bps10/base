@@ -3,10 +3,17 @@ import os
 import unittest
 import numpy as np
 
+<<<<<<< HEAD
 os.path.os.chdir('../')
 
 from base import spectsens as sp
+=======
+import spectsens as sp
+>>>>>>> 387604c0eafb860db222f4e7a8825452599199f9
 
+import sys
+
+sys.path.append('../../')
 
 class TestSpec(unittest.TestCase):
 

@@ -25,6 +25,7 @@ def rad2deg(radians):
     """
     return radians * 180.0 / np.pi
 
+
 def deg2rad(degrees):
     """convert degrees to radians
     """
