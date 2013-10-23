@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
-import os 
 import unittest
 import numpy as np
 
-import files as f
+import sys
+sys.path.append('../')
+
+from base import files as f
 
 
 class TestFiles(unittest.TestCase):

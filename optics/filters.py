@@ -1,14 +1,18 @@
 from __future__ import division
 import numpy as np
+import os
+
+
+this_dir = os.path.dirname(os.path.realpath(__file__))
 
 def stockman(minLambda=390, maxLambda=770, ONLY_LENS=False, 
             ONLY_MACULA=False, RETURN_SPECTRUM=False, resolution=1):
     '''
     '''
     dsamp = resolution * 10.0
-    lens = np.genfromtxt('base/optics/stockman/lens.csv', 
+    lens = np.genfromtxt(this_dir + '/stockman/lens.csv', 
                          delimiter=',')[::dsamp, :]
-    macula = np.genfromtxt('base/optics/stockman/macular.csv', 
+    macula = np.genfromtxt(this_dir+ '/stockman/macular.csv', 
                             delimiter=',')[::dsamp, :]
 
     spectrum = lens[:, 0]
@@ -32,7 +36,7 @@ def stockman(minLambda=390, maxLambda=770, ONLY_LENS=False,
 def lens_age_correction(age, spectrum):
     '''
     '''
-    dat = np.genfromtxt('base/optics/pokorny/lens_age_1987.csv', 
+    dat = np.genfromtxt(this_dir + '/pokorny/lens_age_1987.csv', 
         delimiter=',', names=True)
     ind = np.where(spectrum == 650)[0] + 1
 

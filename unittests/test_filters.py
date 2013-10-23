@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
-import os 
 import unittest
 import numpy as np
 
-import optics as op
+import sys
+sys.path.append('../')
+
+from base import optics as op
 
 
 class TestFilters(unittest.TestCase):
