@@ -13,7 +13,7 @@ def stockman(minLambda=390, maxLambda=770, ONLY_LENS=False,
 
     spectrum = lens[:, 0]
     # find location of maxLambda
-    ind1 = 0 # np.where(spectrum == minLambda)[0]
+    ind1 = np.where(spectrum == minLambda)[0]
     ind2 = np.where(spectrum == maxLambda)[0]
 
     spectrum = spectrum[ind1:ind2 + 1]
