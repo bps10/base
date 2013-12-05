@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
-import os 
 import unittest
 import numpy as np
 
-import spectsens as sp
-
 import sys
+sys.path.append('../')
 
-sys.path.append('../../')
+from base import spectsens as sp
+
 
 class TestSpec(unittest.TestCase):
 
@@ -35,5 +34,7 @@ class TestSpec(unittest.TestCase):
         sens = sp.stockmanfund(resolution=10)
         self.assertTrue(len(sens[:, 0]) == 39)
         
+
 if __name__ == '__main__':
+
     unittest.main()

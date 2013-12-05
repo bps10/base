@@ -1,13 +1,16 @@
 from __future__ import division
+import os
 import numpy as np
 
+
+this_dir = os.path.dirname(os.path.realpath(__file__))
 
 def stockman(minLambda=390, maxLambda=770, LOG=False, OpticalDensity=0.5,
 				RETURN_SPECTRUM=False, resolution=1, EXTINCTION=False):
     '''
     '''
     dsamp = resolution * 10.0
-    exTemp = np.genfromtxt('base/spectsens/stockman/specSens.csv', 
+    exTemp = np.genfromtxt(this_dir + '/stockman/specSens.csv', 
                     delimiter=',')[::dsamp, :]
 
     spectrum = exTemp[:, 0]
@@ -39,7 +42,7 @@ def stockmanfund(minLambda=390, maxLambda=770, LOG=False,
     '''
     '''
     dsamp = resolution * 10.0
-    sens = np.genfromtxt('base/spectsens/stockman/fundamentals2deg.csv', 
+    sens = np.genfromtxt(this_dir + '/stockman/fundamentals2deg.csv', 
                     delimiter=',')[::dsamp, :]
 
     spectrum = sens[:, 0]

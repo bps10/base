@@ -1,8 +1,12 @@
+#! /usr/bin/env python
 from __future__ import division
 import numpy as np
 from scipy.optimize import fsolve
 import matplotlib.pylab as plt
 
+import os
+import sys
+sys.path.append(os.getcwd())
 
 from base import spectsens as s
 
@@ -222,11 +226,18 @@ class cone(object):
 	def simulate(self):
 		'''
 		'''
-		nstim = len(self.stimulus)
+		# abbreviate for speed:
+		_dat = self.data
+		_k = self.k
+		_stim = self.stimulus
+		_const = self.const
+		exp = np.exp
+
+		nstim = len(_stim)
 		response = np.zeros(nstim)
 
 		for istim in range(0, nstim):
-			for istep in range(0, self.const['nstep']):
+			for istep in range(0, _const['nstep']):
 			   
 				if istim == 0 and istep == 0:
 					ncurr = 0             # current element
@@ -236,86 +247,86 @@ class cone(object):
 					ncurr = nprev
 					nprev = nkl
 
-				self.data['stim'][ncurr] = self.stimulus[istim] 
+				_dat['stim'][ncurr] = _stim[istim] 
 
-				self.data['resp_ir'][ncurr] = (self.data['gain_r'][nprev] * 
-							self.data['stim'][ncurr])
+				_dat['resp_ir'][ncurr] = (_dat['gain_r'][nprev] * 
+							_dat['stim'][ncurr])
 				
-				self.data['resp_r'][ncurr] = (self.k['f1_tau_r'] * 
-							self.data['resp_r'][nprev] + self.k['f2_tau_r'] * 
-							self.data['resp_ir'][nprev] + self.k['f3_tau_r'] * 
-							self.data['resp_ir'][ncurr])
+				_dat['resp_r'][ncurr] = (_k['f1_tau_r'] * 
+							_dat['resp_r'][nprev] + _k['f2_tau_r'] * 
+							_dat['resp_ir'][nprev] + _k['f3_tau_r'] * 
+							_dat['resp_ir'][ncurr])
 				
-				tau_b = self.const['tau_b0'] * (self.data['resp_b'][nprev] + 
-							self.const['rk_b']) / self.const['rk_b']
+				tau_b = _const['tau_b0'] * (_dat['resp_b'][nprev] + 
+							_const['rk_b']) / _const['rk_b']
 				
-				gain_b = self.const['cn'] * tau_b / self.const['tau_r']
+				gain_b = _const['cn'] * tau_b / _const['tau_r']
 				
-				f1_tau_b = np.exp( - 1 / tau_b)
+				f1_tau_b = exp( - 1 / tau_b)
 				f2_tau_b = gain_b * (tau_b - (1 + tau_b) * f1_tau_b)
 				f3_tau_b = gain_b * (1 - tau_b + tau_b * f1_tau_b)
 				
-				self.data['resp_b'][ncurr] = (f1_tau_b * self.data['resp_b'][nprev] + 
-							f2_tau_b * self.data['resp_r'][nprev] + 
-							f3_tau_b * self.data['resp_r'][ncurr])
+				_dat['resp_b'][ncurr] = (f1_tau_b * _dat['resp_b'][nprev] + 
+							f2_tau_b * _dat['resp_r'][nprev] + 
+							f3_tau_b * _dat['resp_r'][ncurr])
 				
-				self.data['gain_r'][ncurr] = (1 - self.data['resp_b'][ncurr] -
-							self.const['cn'] * self.data['resp_r'][ncurr])
+				_dat['gain_r'][ncurr] = (1 - _dat['resp_b'][ncurr] -
+							_const['cn'] * _dat['resp_r'][ncurr])
 				 
-				self.data['resp_e'][ncurr] = (self.k['f1_tau_e'] * 
-							self.data['resp_e'][nprev] + self.k['f2_tau_e'] * 
-							self.data['resp_r'][nprev] + self.k['f3_tau_e'] * 
-							self.data['resp_r'][ncurr])
+				_dat['resp_e'][ncurr] = (_k['f1_tau_e'] * 
+							_dat['resp_e'][nprev] + _k['f2_tau_e'] * 
+							_dat['resp_r'][nprev] + _k['f3_tau_e'] * 
+							_dat['resp_r'][ncurr])
 
-				self.data['beta'][ncurr] = (self.const['c_beta'] + 
-							self.const['rk_beta'] * self.data['resp_e'][ncurr])
-				self.data['beta_e'][ncurr] = (self.data['beta'][ncurr] / 
-							(1 + self.data['beta'][ncurr] / self.const['beta_e_max']))
-				self.data['resp_q'][ncurr] = 1 / self.data['beta_e'][ncurr]
+				_dat['beta'][ncurr] = (_const['c_beta'] + 
+							_const['rk_beta'] * _dat['resp_e'][ncurr])
+				_dat['beta_e'][ncurr] = (_dat['beta'][ncurr] / 
+							(1 + _dat['beta'][ncurr] / _const['beta_e_max']))
+				_dat['resp_q'][ncurr] = 1 / _dat['beta_e'][ncurr]
 
 				# express tau_x in time steps
-				self.data['tau_x'][ncurr] = (self.data['resp_q'][ncurr] * 
-							self.const['nstep'])
-				f1_tau_x = np.exp( - 1 / self.data['tau_x'][ncurr])
-				f2_tau_x = (self.data['tau_x'][ncurr] - 
-							(1 + self.data['tau_x'][ncurr]) * f1_tau_x)
-				f3_tau_x = (1 - self.data['tau_x'][ncurr] + 
-							self.data['tau_x'][ncurr] * f1_tau_x)
+				_dat['tau_x'][ncurr] = (_dat['resp_q'][ncurr] * 
+							_const['nstep'])
+				f1_tau_x = exp( - 1 / _dat['tau_x'][ncurr])
+				f2_tau_x = (_dat['tau_x'][ncurr] - 
+							(1 + _dat['tau_x'][ncurr]) * f1_tau_x)
+				f3_tau_x = (1 - _dat['tau_x'][ncurr] + 
+							_dat['tau_x'][ncurr] * f1_tau_x)
 
-				self.data['resp_x'][ncurr] = (f1_tau_x * self.data['resp_x'][nprev] + 
-							self.data['gain_x'][nprev] * f2_tau_x * 
-							self.data['resp_q'][nprev] + self.data['gain_x'][nprev] * 
-							f3_tau_x * self.data['resp_q'][ncurr])
+				_dat['resp_x'][ncurr] = (f1_tau_x * _dat['resp_x'][nprev] + 
+							_dat['gain_x'][nprev] * f2_tau_x * 
+							_dat['resp_q'][nprev] + _dat['gain_x'][nprev] * 
+							f3_tau_x * _dat['resp_q'][ncurr])
 
 				
-				self.data['resp_os'][ncurr] = (self.data['resp_x'][ncurr] ** 
-							self.const['rnx'])
+				_dat['resp_os'][ncurr] = (_dat['resp_x'][ncurr] ** 
+							_const['rnx'])
 				          
-				self.data['resp_c'][ncurr] = (self.k['f1_tau_c'] * 
-							self.data['resp_c'][nprev] + self.k['f2_tau_c'] * 
-							self.data['resp_os'][nprev] + self.k['f3_tau_c'] * 
-							self.data['resp_os'][ncurr])
+				_dat['resp_c'][ncurr] = (_k['f1_tau_c'] * 
+							_dat['resp_c'][nprev] + _k['f2_tau_c'] * 
+							_dat['resp_os'][nprev] + _k['f3_tau_c'] * 
+							_dat['resp_os'][ncurr])
 				 
-				self.data['gain_x'][ncurr] = (1 / (1 + (self.const['a_c'] * 
-							self.data['resp_c'][ncurr]) ** self.const['rnc']))
+				_dat['gain_x'][ncurr] = (1 / (1 + (_const['a_c'] * 
+							_dat['resp_c'][ncurr]) ** _const['rnc']))
 				   
-				self.data['resp_vc'][ncurr] = (self.data['resp_os'][ncurr] / 
-							self.data['atten_i'][nprev] )
+				_dat['resp_vc'][ncurr] = (_dat['resp_os'][ncurr] / 
+							_dat['atten_i'][nprev] )
 				
-				self.data['resp_is'][ncurr] = (self.k['f1_tau_vc'] * 
-							self.data['resp_is'][nprev] + self.k['f2_tau_vc'] * 
-							self.data['resp_vc'][nprev] + self.k['f3_tau_vc'] * 
-							self.data['resp_vc'][ncurr])
+				_dat['resp_is'][ncurr] = (_k['f1_tau_vc'] * 
+							_dat['resp_is'][nprev] + _k['f2_tau_vc'] * 
+							_dat['resp_vc'][nprev] + _k['f3_tau_vc'] * 
+							_dat['resp_vc'][ncurr])
 				 
-				self.data['resp_im'][ncurr] = (self.data['resp_is'][ncurr] ** 
-							self.const['gamma_is'])
+				_dat['resp_im'][ncurr] = (_dat['resp_is'][ncurr] ** 
+							_const['gamma_is'])
 				   
-				self.data['atten_i'][ncurr] = (self.k['f1_tau_is'] * 
-							self.data['atten_i'][nprev] + self.k['f2_tau_is'] * 
-							self.data['resp_im'][nprev] + self.k['f3_tau_is'] * 
-							self.data['resp_im'][ncurr])      
+				_dat['atten_i'][ncurr] = (_k['f1_tau_is'] * 
+							_dat['atten_i'][nprev] + _k['f2_tau_is'] * 
+							_dat['resp_im'][nprev] + _k['f3_tau_is'] * 
+							_dat['resp_im'][ncurr])      
 				
-			resp_norm = ((self.data['resp_is'][ncurr] - self.dark['resp_is']) /
+			resp_norm = ((_dat['resp_is'][ncurr] - self.dark['resp_is']) /
 								self.dark['resp_is'] )
 			response[istim] = resp_norm
 
@@ -507,10 +518,10 @@ def plot_temp_sens():
 	plt.show()
 
 
-
 if __name__ == '__main__':
 
 	from base import plot as pf
-	plot_temp_sens()
+	#plot_temp_sens()
 	#plot_frequencies()
-	#plot_cone()
+	plot_cone()
+	
