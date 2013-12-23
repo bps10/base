@@ -378,6 +378,7 @@ def plot_cone():
 	response = c.simulate()
 
 	fig  = plt.figure(figsize=(10, 8))
+	fig.set_tight_layout(True)
 	ax1 = fig.add_subplot(211)
 	ax2 = fig.add_subplot(212)
 	pf.AxisFormat()
@@ -391,7 +392,6 @@ def plot_cone():
 	ax2.set_ylabel('normalized response')
 	ax2.set_xlabel('time')
 
-	plt.tight_layout()
 	plt.show()
 
 def plot_frequencies():
@@ -420,6 +420,7 @@ def plot_frequencies():
 
 
 	fig  = plt.figure(figsize=(10, 8))
+	fig.set_tight_layout(True)
 	ax1 = fig.add_subplot(411)
 	ax2 = fig.add_subplot(412)
 	ax3 = fig.add_subplot(413)
@@ -446,7 +447,6 @@ def plot_frequencies():
 
 	#ax4.set_xlim([min(x), max(x)])
 
-	plt.tight_layout()
 	plt.show()
 
 
@@ -504,6 +504,7 @@ def plot_temp_sens():
 	freqs, amp = temporal_sensitivity()
 
 	fig  = plt.figure()
+	fig.set_tight_layout(True)
 	ax1 = fig.add_subplot(111)
 
 	pf.AxisFormat()
@@ -514,7 +515,6 @@ def plot_temp_sens():
 	ax1.set_xlabel('frequency (Hz)')
 	ax1.set_ylabel('sensitivity')
 
-	plt.tight_layout()
 	plt.show()
 
 

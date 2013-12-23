@@ -328,6 +328,7 @@ def plot_cone():
     stimulus,  response = c.simulate()
 
     fig  = plt.figure()
+    fig.set_tight_layout(True)
     #ax1 = fig.add_subplot(211)
     ax2 = fig.add_subplot(111)
     pf.AxisFormat()
@@ -344,8 +345,6 @@ def plot_cone():
     #ax1.set_ylabel('luminance (td)')
     ax2.set_ylabel('normalized response')
     ax2.set_xlabel('time')
-
-    plt.tight_layout()
     plt.show()
 
 if __name__ == '__main__':

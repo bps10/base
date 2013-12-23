@@ -113,13 +113,14 @@ def TufteAxis(ax, spines, Nticks = None, integer='on'):
        :emphasize-lines: 4
 
        fig = plt.figure(figsize=(8,6))
+       fig.set_tight_layout(True)
        ax = fig.add_subplot(111)
 
        pf.TufteAxis(ax, ['left', 'bottom'], Nticks=[5,7])
 
        ax.plot(np.arange(0,100), np.arange(0,100), 'b-', linewidth =2)
 
-       plt.tight_layout()
+       fig.set_tight_layout(True)
        plt.show()
 
 
@@ -253,7 +254,7 @@ def AxisFormat(FONTSIZE=22, TickSize=10, TickDirection='out',
 
        ax.plot(np.arange(0,100), np.arange(0,100), 'b-', linewidth =2)
 
-       plt.tight_layout()
+       fig.set_tight_layout(True)
        plt.show()
 
     **Exmaple**
@@ -270,7 +271,7 @@ def AxisFormat(FONTSIZE=22, TickSize=10, TickDirection='out',
        :include-source:
 
     """
-    font = {'weight': 'norm', 'size': FONTSIZE}
+    font = {'weight': 'normal', 'size': FONTSIZE}
     legend = {'frameon': False}
     ticks = {'direction': TickDirection, 'major.size': TickSize,
              'minor.size': TickSize - 2}
