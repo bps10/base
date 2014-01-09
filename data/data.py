@@ -1,6 +1,10 @@
 from __future__ import division
 import numpy as np
-import Image, cPickle
+try:
+    import Image
+except ImportError:
+    from PIL import Image
+import cPickle
 
 ### Data manipulation tools ###
 ###############################
