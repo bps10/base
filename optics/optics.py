@@ -3,7 +3,7 @@ import numpy as np
 
 
 
-def genPSF(intensity, samples, gaussian_blur=True):
+def PSF(intensity, samples, gaussian_blur=True):
     '''
     '''
     xvals = np.arange(0, samples)
@@ -28,16 +28,15 @@ def genPSF(intensity, samples, gaussian_blur=True):
         PSF[i] = deriv[i]  / area 
 
     # normalize so that each PSF has same integral of 1.
-    #PSF = np.sqrt(PSF)
     PSF = PSF / np.sum(PSF)
 
     PSFtotal[1:samples + 1] = PSF[::-1]
     PSFtotal[samples:-1] = PSF
+    PSFtotal = PSFtotal / np.sum(PSFtotal)
 
     if gaussian_blur:
         gaussianFilter = gauss(np.arange(-samples, samples + 1), 2)
         PSFtotal = np.convolve(PSFtotal, gaussianFilter, mode='same')
-
 
     return PSF, PSFtotal
 
@@ -48,7 +47,7 @@ def gauss(x, SD):
     return 1.0 * np.exp(-(x) ** 2 / (2 * SD ** 2))
 
 
-def genMTF(PSFtotal):
+def MTF(PSFtotal):
     '''
     '''
     samples = len(PSFtotal)
@@ -137,7 +136,7 @@ def nextpow2(n):
     return 2 ** m_i
 
 
-def MTF(spatial_frequency,eccentricity, paper='Williams1996_astig'):
+def MTF_analytical(spatial_frequency, eccentricity, paper='Williams1996_astig'):
     """    
     Compute the modulation frequency transfer as a function of eccentricity
     based on the equation derrived in Navarro, Artal, and Williams 1993. 
