@@ -1,7 +1,7 @@
 
 # from http://codingmess.blogspot.com/2009/05/conversion-of-wavelength-in-nanometers.html
 
-def wav2RGB(wavelength):
+def wav2RGB(wavelength, MAX=1):
     w = int(wavelength)
 
     # colour
@@ -43,6 +43,6 @@ def wav2RGB(wavelength):
         SSS = 0.3 + 0.7*(780 - w) / (780 - 700)
     else:
         SSS = 0.0
-    SSS *= 1
+    SSS *= MAX
 
     return [int(SSS*R), int(SSS*G), int(SSS*B)]
