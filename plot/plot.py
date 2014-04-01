@@ -225,8 +225,8 @@ def SciNoteAxis(gca_handle,spines):
 
 
 
-def AxisFormat(FONTSIZE=22, TickSize=10, TickDirection='out',
-                linewidth=2, markersize=8):
+def AxisFormat(fontsize=26, ticksize=16, tickdirection='out',
+                linewidth=2, markersize=10):
     """
 
     Format axes to standard design.
@@ -271,10 +271,10 @@ def AxisFormat(FONTSIZE=22, TickSize=10, TickDirection='out',
        :include-source:
 
     """
-    font = {'weight': 'normal', 'size': FONTSIZE}
+    font = {'weight': 'normal', 'size': fontsize}
     legend = {'frameon': False}
-    ticks = {'direction': TickDirection, 'major.size': TickSize,
-             'minor.size': TickSize - 2}
+    ticks = {'direction': tickdirection, 'major.size': ticksize,
+             'minor.size': ticksize - 2}
     lines = {"linewidth": linewidth, "markeredgewidth": 0,
             "markersize": markersize}
 
