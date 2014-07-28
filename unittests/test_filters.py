@@ -24,8 +24,9 @@ class TestFilters(unittest.TestCase):
         filt = op.filters.stockman(minLambda=390, maxLambda=770, 
             ONLY_LENS=False, ONLY_MACULA=True, RETURN_SPECTRUM=False, 
             resolution=10)
-        print np.max(filt)
         self.assertTrue(np.max(filt) < 2)
+        filt = op.filters.lens_age_correction(30, np.arange(390, 771, 1))
+        self.assertTrue(len(filt) == 381)
 
 
         
