@@ -1,6 +1,6 @@
 # -*- coding: utf-8 *-*
 import numpy as np
-
+from base import optics as op
 
 def neitz(LambdaMax=559, OpticalDensity=0.5, LOG=False,
                 StartWavelength=390, EndWavelength=780, 
@@ -88,3 +88,42 @@ def neitz(LambdaMax=559, OpticalDensity=0.5, LOG=False,
         return extinction
     return withOD
 
+
+def load_spect(speak=420, mpeak=530, lpeak=559,
+    lambdamin=390, lambdamax=750, OD=[0.3, 0.4, 0.4],
+    add_filters=True, LOG=False):
+    ''' Load the spectral sensitivity functions with 
+    pre-retinal filters accounted for. Returns a dictionary
+    with 'l', 'm' and 's' as keys.
+    '''
+    # spectral sensitivity
+    s_cone = neitz(LambdaMax=420, OpticalDensity=OD[0], 
+                    LOG=LOG,
+                    StartWavelength=lambdamin, 
+                    EndWavelength=lambdamax, 
+                    resolution=1, EXTINCTION=False)
+    m_cone = neitz(LambdaMax=530, OpticalDensity=OD[1], 
+                    LOG=LOG,
+                    StartWavelength=lambdamin, 
+                    EndWavelength=lambdamax, 
+                    resolution=1, EXTINCTION=False)
+    l_cone = neitz(LambdaMax=559, OpticalDensity=OD[2], 
+                    LOG=LOG,
+                    StartWavelength=lambdamin, 
+                    EndWavelength=lambdamax, 
+                    resolution=1, EXTINCTION=False)
+
+    # filters
+    if add_filters:
+        filters = op.filters.stockman(minLambda=lambdamin, 
+                maxLambda=lambdamax)
+
+        # account for pre-retinal filters
+        s_cone /= filters
+        m_cone /= filters
+        l_cone /= filters
+
+    # package into dict
+    sens = {'l': l_cone, 'm': m_cone, 's': s_cone}
+
+    return sens
