@@ -15,7 +15,7 @@ def stockman(minLambda=390, maxLambda=770, LOG=False, OpticalDensity=0.5,
 
     spectrum = exTemp[:, 0]
     # find location of min and max Lambda
-    ind1 = 0 #np.where(spectrum == minLambda)[0]
+    ind1 = np.where(spectrum == minLambda)[0]
     ind2 = np.where(spectrum == maxLambda)[0]
 
     # take only between min and max lambda
@@ -47,7 +47,7 @@ def stockmanfund(minLambda=390, maxLambda=770, LOG=False,
 
     spectrum = sens[:, 0]
     # find location of min and max Lambda
-    ind1 = 0 #np.where(spectrum == minLambda)[0]
+    ind1 = np.where(spectrum == minLambda)[0]
     ind2 = np.where(spectrum == maxLambda)[0]
 
     # take only between min and max lambda
