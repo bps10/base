@@ -283,3 +283,21 @@ def AxisFormat(fontsize=26, ticksize=16, tickdirection='out',
     plt.rc('xtick', **ticks)
     plt.rc('ytick', **ticks)
     plt.rc('lines', **lines)
+
+
+def get_axes(nrows=1, ncols=1, nticks=[5, 5], figsize=(8, 6),
+             fontsize=26, ticksize=16, tickdirection='out', 
+             linewidth=2, markersize=10):
+    '''
+    '''
+    fig = plt.figure(figsize=figsize)
+    fig.set_tight_layout(True)
+    AxisFormat()
+
+    ax = {}
+    nsubplots = nrows * ncols
+    for i in range(nsubplots):
+        ax[i] = fig.add_subplot(ncols, nrows, i + 1)
+        TufteAxis(ax[i], ['left', 'bottom'], Nticks=nticks)
+
+    return ax
