@@ -9,7 +9,8 @@ def getAllFiles(dirName, suffix = None, subdirectories = 1):
     :type Directory: str
     :param suffix: find only files with a specific ending.
     :type suffix: str
-    :param subdirectories: indicate how deep (# of directories) you would like to search; 0 - 2.
+    :param subdirectories: indicate how deep (# of directories) you would \
+    like to search: 0 = working directory.
     :type subdirectories: int
     
     :returns: a list of path names.
@@ -17,27 +18,20 @@ def getAllFiles(dirName, suffix = None, subdirectories = 1):
 
     e.g. subdirectories = 1: Find all files within a directory and its 
     first layer of subdirectories.
-
     
     """
     if suffix is None:
-        suffix = '/*'
-        
-    if subdirectories == 0:
-        files = []
-        for name in glob.glob(dirName + suffix):
-            files = np.append(files,name)
-            
-    if subdirectories == 1:
-        files = []
-        for name in glob.glob(dirName + '/*' + suffix):
-            files = np.append(files,name)
-    
-    if subdirectories == 2:
-        files = []
-        for name in glob.glob(dirName + '/*/*' + suffix):
-            files = np.append(files,name)
-        
+        suffix = ''
+
+    depth = '/*'
+    for i in range(subdirectories):
+        depth += depth
+
+    f = dirName + depth + suffix
+
+    files = []
+    for name in glob.glob(f):
+        files.append(name)
     
     return files		
 
