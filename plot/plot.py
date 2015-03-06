@@ -292,7 +292,9 @@ def get_axes(nrows=1, ncols=1, nticks=[5, 5], figsize=(8, 6),
     '''
     fig = plt.figure(figsize=figsize)
     fig.set_tight_layout(True)
-    AxisFormat()
+    AxisFormat(ticksize=ticksize, fontsize=fontsize,
+               tickdirection=tickdirection, linewidth=linewidth, 
+               markersize=markersize)
 
     ax = {}
     nsubplots = nrows * ncols

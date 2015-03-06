@@ -16,11 +16,11 @@ def smithpokorny(minLambda=390, maxLambda=770, log=False,
         data_name = '/smithpokorny/sp.csv'
 
 
-    dat = np.genfromtxt(this_dir + '/smithpokorny/sp.csv', 
+    dat = np.genfromtxt(this_dir + data_name, 
                     delimiter=',')
-
     spectrum = dat[:, 0]
 
+    # make sure min and max are within measured range
     if minLambda < spectrum[0]:
         raise InputError('minLambda cannot be less than {0} nm'.format(
             str(spectrum[0])))
