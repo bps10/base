@@ -33,18 +33,27 @@ def stockman(minLambda=390, maxLambda=770, ONLY_LENS=False,
     return filters
 
 
-def lens_age_correction(age, spectrum):
+def lens_age_correction(age, spectrum, stiles=True):
+    '''If stiles is true, use Wyszechki and Stiles (1982)
+    measurements. If false, use van Norren and Vos (1974).
     '''
-    '''
-    #dat = np.genfromtxt(this_dir + '/pokorny/lens_age_1987.csv', 
-    #    delimiter=',', names=True)
-    sp_dat = {'wavelength': np.arange(400, 651, 10),
-        'TL1': np.array([0.6, 0.51, 0.433, 0.377, 0.327, 
-            0.295, 0.267, 0.233, 0.207, 0.187, 0.167, 
-            0.147, 0.133, 0.12, 0.107, 0.093, 0.08, 0.067, 
-            0.053, 0.04, 0.033, 0.027, 0.02, 0.013, 0.007, 0]),
-        'TL2': np.array([1, 0.583, 0.3, 0.116, 0.033, 0.005, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])}
+    if stiles:
+        sp_dat = {'wavelength': np.arange(400, 651, 10),
+                  'TL1': np.array([0.6, 0.51, 0.433, 0.377, 0.327, 
+                            0.295, 0.267, 0.233, 0.207, 0.187, 0.167, 
+                            0.147, 0.133, 0.12, 0.107, 0.093, 0.08, 0.067, 
+                            0.053, 0.04, 0.033, 0.027, 0.02, 0.013, 0.007, 0]),
+                  'TL2': np.array([1, 0.583, 0.3, 0.116, 0.033, 0.005, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])}
+    else: # van Norren and Vos
+        sp_dat = {'wavelength': np.arange(400, 651, 10),
+                  'TL1': np.array([0.6, 0.51, 0.433, 0.377, 0.327, 
+                            0.295, 0.267, 0.233, 0.207, 0.187, 0.167, 
+                            0.147, 0.133, 0.12, 0.107, 0.093, 0.08, 0.067, 
+                            0.053, 0.04, 0.033, 0.027, 0.02, 0.013, 0.007, 0]),
+                  'TL2': np.array([1.33, 0.77, 0.354, 0.116, 0.033, 0.005, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])}
+
 
     ind = np.where(spectrum == 650)[0] + 1
 
