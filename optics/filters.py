@@ -63,3 +63,28 @@ def lens_age_correction(age, spectrum):
     out = np.zeros(len(spectrum))
     out[:ind] = lens
     return out
+
+
+def vanNorren(age, spectrum, field_size='large'):
+    '''
+    '''
+
+    if field_size.lower() == 'large':
+        dRL = 0.225
+    elif field_size.lower() == 'small':
+        dRL = 0.446
+    else:
+        raise ValueError('field size must be small or large')
+
+    media = ((dRL + 0.000031 * age ** 2) *
+             (400 / spectrum) ** 4 +
+             14.19 * 10.68 * np.exp(-((0.057 * (spectrum - 273)) ** 2)) +
+             (0.998 - 0.000063 * age ** 2) * 2.13 *
+             np.exp(-((0.029 * (spectrum - 370)) ** 2)) + 
+             (0.059 + 0.000186 * age ** 2) * 11.95 *
+             np.exp(-((0.021 * (spectrum - 325)) ** 2)) +
+             (0.016 + 0.000132 * age ** 2) * 1.43 *
+             np.exp(-((0.008 * (spectrum - 325)) ** 2)) + 0.111)
+
+    return media
+             
