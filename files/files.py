@@ -1,5 +1,6 @@
 import glob as glob
-import numpy as np
+import os
+
 
 def getAllFiles(dirName, suffix = None, subdirectories = 1):
     """
@@ -34,6 +35,14 @@ def getAllFiles(dirName, suffix = None, subdirectories = 1):
         files.append(name)
     
     return files		
+
+
+def make_dir(directory):
+    ''' Check if a directory exists and make one if it does not'''
+
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
 
 # Below from PsychoPy library. Copyright (C) 2009 Jonathan Peirce
 # Distributed under the terms of the GNU General Public License (GPL).
