@@ -287,7 +287,8 @@ def AxisFormat(fontsize=26, ticksize=16, tickdirection='out',
 
 def get_axes(nrows=1, ncols=1, nticks=[5, 5], figsize=(8, 6),
              fontsize=26, ticksize=16, tickdirection='out', 
-             linewidth=2, markersize=10, axis_loc=['left', 'bottom']):
+             linewidth=2, markersize=10, axis_loc=['left', 'bottom'],
+             return_fig=False):
     '''
     '''
     fig = plt.figure(figsize=figsize)
@@ -302,4 +303,7 @@ def get_axes(nrows=1, ncols=1, nticks=[5, 5], figsize=(8, 6),
         ax[i] = fig.add_subplot(ncols, nrows, i + 1)
         TufteAxis(ax[i], axis_loc, Nticks=nticks)
 
-    return ax
+    if return_fig:
+        return ax, fig
+    else:
+        return ax
