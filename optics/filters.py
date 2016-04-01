@@ -55,7 +55,7 @@ def lens_age_correction(age, spectrum, stiles=True):
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])}
 
     if spectrum.max() > 650:
-        ind = np.where(spectrum == 650)[0] + 1
+        ind = int(np.where(spectrum == 650)[0] + 1)
     else:
         ind = -1
     # interpolate values from pokorny with linear interp.
