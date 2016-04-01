@@ -9,14 +9,14 @@ def stockman(minLambda=390, maxLambda=770, LOG=False, OpticalDensity=0.5,
 				RETURN_SPECTRUM=False, resolution=1, EXTINCTION=False):
     '''
     '''
-    dsamp = resolution * 10.0
+    dsamp = int(resolution * 10.0)
     exTemp = np.genfromtxt(this_dir + '/stockman/specSens.csv', 
                     delimiter=',')[::dsamp, :]
 
     spectrum = exTemp[:, 0]
     # find location of min and max Lambda
-    ind1 = np.where(spectrum == minLambda)[0]
-    ind2 = np.where(spectrum == maxLambda)[0]
+    ind1 = int(np.where(spectrum == minLambda)[0])
+    ind2 = int(np.where(spectrum == maxLambda)[0])
 
     # take only between min and max lambda
     spectrum = spectrum[ind1:ind2 + 1]
@@ -41,14 +41,14 @@ def stockmanfund(minLambda=390, maxLambda=770, LOG=False,
 				RETURN_SPECTRUM=False, resolution=1):
     '''
     '''
-    dsamp = resolution * 10.0
+    dsamp = int(resolution * 10.0)
     sens = np.genfromtxt(this_dir + '/stockman/fundamentals2deg.csv', 
                     delimiter=',')[::dsamp, :]
 
     spectrum = sens[:, 0]
     # find location of min and max Lambda
-    ind1 = np.where(spectrum == minLambda)[0]
-    ind2 = np.where(spectrum == maxLambda)[0]
+    ind1 = int(np.where(spectrum == minLambda)[0])
+    ind2 = int(np.where(spectrum == maxLambda)[0])
 
     # take only between min and max lambda
     spectrum = spectrum[ind1:ind2 + 1]
