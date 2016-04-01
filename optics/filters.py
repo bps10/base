@@ -54,9 +54,10 @@ def lens_age_correction(age, spectrum, stiles=True):
                   'TL2': np.array([1.33, 0.77, 0.354, 0.116, 0.033, 0.005, 0,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])}
 
-
-    ind = np.where(spectrum == 650)[0] + 1
-
+    if spectrum.max() > 650:
+        ind = np.where(spectrum == 650)[0] + 1
+    else:
+        ind = -1
     # interpolate values from pokorny with linear interp.
     TL1 = np.interp(spectrum[:ind], sp_dat['wavelength'], sp_dat['TL1'])
     TL2 = np.interp(spectrum[:ind], sp_dat['wavelength'], sp_dat['TL2'])
