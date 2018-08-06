@@ -39,7 +39,7 @@ def getAllFiles(dirName, suffix = None, subdirectories = 1):
 
 def make_dir(directory):
     ''' Check if a directory exists and make one if it does not'''
-
+    directory = os.path.dirname(directory)
     if not os.path.exists(directory):
         os.makedirs(directory)
 

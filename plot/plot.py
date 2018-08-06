@@ -89,10 +89,27 @@ def centerAxes(ax):
     ax.yaxis.set_ticks_position('left')
 
 
-def TufteAxis(ax, spines, Nticks = None, integer='on'):
+def uadAxes(ax):
+    '''
+    '''
+    centerAxes(ax)
+    ax.plot([-1, 0, 0, 1, 1, 0, 0, -1],
+             [0, 1, 1, 0, 0, -1, -1, 0], 'k--')
+
+    # Turn off tick labels
+    ax.set_yticklabels([])
+    ax.set_xticklabels([])    
+    ax.axis('equal')
+    ax.set_yticks(np.arange(-1, 1.01, 0.25))
+    ax.set_xticks(np.arange(-1, 1.01, 0.25))
+    
+
+def TufteAxis(ax, spines, Nticks = None, integer='on',
+              smart_bounds=False):
     """
 
-    Change the axes of a plot to have axes that are offset, inspired by Edward Tufte.
+    Change the axes of a plot to have axes that are offset, inspired by 
+    Edward Tufte.
 
     :param ax: handle to the axes.
     :param spines: list of spines you wish to display. Others will be hidden.
@@ -142,7 +159,7 @@ def TufteAxis(ax, spines, Nticks = None, integer='on'):
     for loc, spine in ax.spines.iteritems():
         if loc in spines:
             spine.set_position(('outward',10)) # outward by 10 points
-            spine.set_smart_bounds(True)
+            spine.set_smart_bounds(smart_bounds)
         else:
             spine.set_color('none') # don't draw spine
 
@@ -198,15 +215,14 @@ def TufteAxis(ax, spines, Nticks = None, integer='on'):
                                                            integer=False))
 
 
-
-
 def SciNoteAxis(gca_handle,spines):
     """
 
     Force scientific notation.
 
     :param gca_handle: plt.gca handle
-    :param spines: indicate what spines [x and/or y] you wish to force sci note on.
+    :param spines: indicate what spines [x and/or y] you wish to force sci 
+    note on.
     :type spines: list of strings
 
     .. note::
@@ -286,7 +302,7 @@ def AxisFormat(fontsize=26, ticksize=16, tickdirection='out',
 
 
 def get_axes(nrows=1, ncols=1, nticks=[5, 5], figsize=(8, 6),
-             fontsize=26, ticksize=16, tickdirection='out', 
+             fontsize=13, ticksize=6, tickdirection='out', 
              linewidth=2, markersize=10, axis_loc=['left', 'bottom'],
              return_fig=False):
     '''
@@ -300,7 +316,7 @@ def get_axes(nrows=1, ncols=1, nticks=[5, 5], figsize=(8, 6),
     ax = {}
     nsubplots = nrows * ncols
     for i in range(nsubplots):
-        ax[i] = fig.add_subplot(ncols, nrows, i + 1)
+        ax[i] = fig.add_subplot(nrows, ncols, i + 1)
         TufteAxis(ax[i], axis_loc, Nticks=nticks)
 
     if return_fig:
