@@ -89,13 +89,35 @@ def centerAxes(ax):
     ax.yaxis.set_ticks_position('left')
 
 
-def uadAxes(ax):
+def uadAxes(ax, add_labels=True, fontsize=10):
     '''
     '''
+    # center the axes
     centerAxes(ax)
-    ax.plot([-1, 0, 0, 1, 1, 0, 0, -1],
-             [0, 1, 1, 0, 0, -1, -1, 0], 'k--')
 
+    # add a diamond to denote the boundaries of the space
+    ax.plot([-1, 0, 0, 1, 1, 0, 0, -1],
+             [0, 1, 1, 0, 0, -1, -1, 0], '--', c='tab:gray',
+            linewidth=1)
+
+    # color the axes gray
+    ax.spines['bottom'].set_color('tab:gray')
+    ax.spines['left'].set_color('tab:gray')
+
+    ax.tick_params(direction='inout', color='tab:gray', zorder=1,
+                   length=5)
+    
+    # add axis labels
+    if add_labels:
+        ax.text(0, 1.025, 'green', fontsize=fontsize,
+                horizontalalignment='center')
+        ax.text(0, -1.15, 'red', fontsize=fontsize,
+                horizontalalignment='center')
+        ax.text(-1.15, 0.0, 'blue', rotation=90, fontsize=fontsize,
+                verticalalignment='center')
+        ax.text(1.025, 0.0, 'yellow', rotation=90, fontsize=fontsize,
+                verticalalignment='center')
+    
     # Turn off tick labels
     ax.set_yticklabels([])
     ax.set_xticklabels([])    
@@ -291,8 +313,7 @@ def AxisFormat(fontsize=26, ticksize=16, tickdirection='out',
     legend = {'frameon': False}
     ticks = {'direction': tickdirection, 'major.size': ticksize,
              'minor.size': ticksize - 2}
-    lines = {"linewidth": linewidth, "markeredgewidth": 0,
-            "markersize": markersize}
+    lines = {"linewidth": linewidth, "markersize": markersize}
 
     plt.rc('font', **font)
     plt.rc('legend', **legend)
@@ -304,7 +325,7 @@ def AxisFormat(fontsize=26, ticksize=16, tickdirection='out',
 def get_axes(nrows=1, ncols=1, nticks=[5, 5], figsize=(8, 6),
              fontsize=13, ticksize=6, tickdirection='out', 
              linewidth=2, markersize=10, axis_loc=['left', 'bottom'],
-             return_fig=False):
+             return_fig=False, smart_bounds=False):
     '''
     '''
     fig = plt.figure(figsize=figsize)
@@ -317,7 +338,8 @@ def get_axes(nrows=1, ncols=1, nticks=[5, 5], figsize=(8, 6),
     nsubplots = nrows * ncols
     for i in range(nsubplots):
         ax[i] = fig.add_subplot(nrows, ncols, i + 1)
-        TufteAxis(ax[i], axis_loc, Nticks=nticks)
+        TufteAxis(ax[i], axis_loc, Nticks=nticks,
+                  smart_bounds=smart_bounds)
 
     if return_fig:
         return ax, fig
