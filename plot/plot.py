@@ -89,7 +89,7 @@ def centerAxes(ax):
     ax.yaxis.set_ticks_position('left')
 
 
-def uadAxes(ax, add_labels=True, fontsize=10):
+def uadAxes(ax, add_labels=True, fontsize=12):
     '''
     '''
     # center the axes
@@ -101,8 +101,8 @@ def uadAxes(ax, add_labels=True, fontsize=10):
             linewidth=1)
 
     # color the axes gray
-    ax.spines['bottom'].set_color('tab:gray')
-    ax.spines['left'].set_color('tab:gray')
+    ax.spines['bottom'].set_color('k')
+    ax.spines['left'].set_color('k')
 
     ax.tick_params(direction='inout', color='tab:gray', zorder=1,
                    length=5)
@@ -110,13 +110,13 @@ def uadAxes(ax, add_labels=True, fontsize=10):
     # add axis labels
     if add_labels:
         ax.text(0, 1.025, 'green', fontsize=fontsize,
-                horizontalalignment='center')
-        ax.text(0, -1.15, 'red', fontsize=fontsize,
-                horizontalalignment='center')
-        ax.text(-1.15, 0.0, 'blue', rotation=90, fontsize=fontsize,
-                verticalalignment='center')
+                horizontalalignment='center', color='tab:gray')
+        ax.text(0, -1.125, 'red', fontsize=fontsize,
+                horizontalalignment='center', color='tab:gray')
+        ax.text(-1.125, 0.0, 'blue', rotation=90, fontsize=fontsize,
+                verticalalignment='center', color='tab:gray')
         ax.text(1.025, 0.0, 'yellow', rotation=90, fontsize=fontsize,
-                verticalalignment='center')
+                verticalalignment='center', color='tab:gray')
     
     # Turn off tick labels
     ax.set_yticklabels([])
