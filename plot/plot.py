@@ -76,15 +76,15 @@ def invert(ax, fig, bk_color='k'):
     ax.xaxis.label.set_color('w')
 
 
-def centerAxes(ax):
+def centerAxes(ax, smart_bounds=True):
     '''
     '''
     ax.spines['left'].set_position('zero')
     ax.spines['right'].set_color('none')
     ax.spines['bottom'].set_position('zero')
     ax.spines['top'].set_color('none')
-    ax.spines['left'].set_smart_bounds(True)
-    ax.spines['bottom'].set_smart_bounds(True)
+    ax.spines['left'].set_smart_bounds(smart_bounds)
+    ax.spines['bottom'].set_smart_bounds(smart_bounds)
     ax.xaxis.set_ticks_position('bottom')
     ax.yaxis.set_ticks_position('left')
 
